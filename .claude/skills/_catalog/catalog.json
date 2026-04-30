@@ -1,0 +1,111 @@
+{
+  "version": "1.0.0",
+  "core_skills": ["meta-skill-creator", "meta-wrap-up", "mkt-brand-voice", "mkt-positioning", "mkt-icp"],
+  "skills": {
+    "tool-humanizer": {
+      "category": "utility",
+      "description": "De-AI text, match brand voice patterns",
+      "requires_services": [],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "tool-firecrawl-scraper": {
+      "category": "utility",
+      "description": "Web scraping with JS rendering and anti-bot bypass",
+      "requires_services": ["FIRECRAWL_API_KEY"],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "tool-youtube": {
+      "category": "utility",
+      "description": "YouTube channel listing and transcript extraction",
+      "requires_services": ["YOUTUBE_API_KEY"],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "str-trending-research": {
+      "category": "strategy",
+      "description": "Research trending topics across Reddit, X, and web",
+      "requires_services": ["OPENAI_API_KEY", "XAI_API_KEY"],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "mkt-copywriting": {
+      "category": "execution",
+      "description": "Direct response copywriting with scoring",
+      "requires_services": [],
+      "dependencies": ["tool-humanizer"],
+      "mcp_servers": []
+    },
+    "mkt-content-repurposing": {
+      "category": "execution",
+      "description": "Repurpose content across 8 platforms",
+      "requires_services": [],
+      "dependencies": ["tool-humanizer"],
+      "mcp_servers": []
+    },
+    "mkt-ugc-scripts": {
+      "category": "execution",
+      "description": "Short-form UGC video scripts for talking-head delivery",
+      "requires_services": [],
+      "dependencies": ["tool-humanizer"],
+      "mcp_servers": []
+    },
+    "viz-excalidraw-diagram": {
+      "category": "visual",
+      "description": "Architecture and workflow diagrams via Excalidraw",
+      "requires_services": [],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "viz-nano-banana": {
+      "category": "visual",
+      "description": "AI image generation via Gemini",
+      "requires_services": ["GEMINI_API_KEY"],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "viz-ugc-heygen": {
+      "category": "visual",
+      "description": "AI avatar videos via HeyGen API",
+      "requires_services": ["HEYGEN_API_KEY"],
+      "dependencies": [],
+      "mcp_servers": ["heygen"]
+    },
+    "str-ai-seo": {
+      "category": "strategy",
+      "description": "Optimize content for AI search engines and LLM citations",
+      "requires_services": [],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "viz-interface-design": {
+      "category": "visual",
+      "description": "Design dashboards, admin panels, and SaaS UIs",
+      "requires_services": [],
+      "dependencies": [],
+      "mcp_servers": []
+    },
+    "tool-stitch": {
+      "category": "utility",
+      "description": "Fetch UI designs from Google Stitch projects",
+      "requires_services": [],
+      "dependencies": [],
+      "mcp_servers": ["stitch"]
+    },
+    "viz-stitch-design": {
+      "category": "visual",
+      "description": "Design and iterate on UI screens with Google Stitch",
+      "requires_services": [],
+      "dependencies": ["tool-stitch"],
+      "mcp_servers": ["stitch"]
+    },
+    "ops-cron": {
+      "category": "operations",
+      "description": "Schedule recurring Claude Code tasks with the managed cron runtime",
+      "requires_services": [],
+      "dependencies": [],
+      "mcp_servers": []
+    }
+  }
+}

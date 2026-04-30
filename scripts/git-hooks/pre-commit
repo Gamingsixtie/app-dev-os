@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Pre-commit hook — type-check guard
+#
+# Runs `pnpm tsc --noEmit` before every commit. Blocks on failure.
+#
+# Skips gracefully when:
+#   - no tsconfig.json (not a TS project yet, e.g. fresh template)
+#   - no package.json (not a Node project)
+#   - pnpm not available (gives a hint instead of failing silently)
+#
+# Why pre-commit, not edit-time:
+#   typecheck-guard.js (Claude-side) is ADVISORY by default — fast, non-blocking
+#   per-edit. This pre-commit hook is the strict gate one level lower: every
+#   commit gets typechecked, with no friction during iterative editing.
+#
+# Bypass when truly needed: `git commit --no-verify` (use sparingly; defeats the point).
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# Skip if no TS project yet
+if [[ ! -f "tsconfig.json" ]]; then
+  exit 0
+fi
+
+if [[ ! -f "package.json" ]]; then
+  exit 0
+fi
+
+# Prefer pnpm (project default per conventions.md), fall back to npx
+if command -v pnpm >/dev/null 2>&1; then
+  TYPECHECK_CMD="pnpm tsc --noEmit"
+elif command -v npx >/dev/null 2>&1; then
+  TYPECHECK_CMD="npx tsc --noEmit"
+else
+  echo "[pre-commit] pnpm and npx both unavailable — install pnpm to enable typecheck guard." >&2
+  echo "[pre-commit] Skipping typecheck (not blocking commit)." >&2
+  exit 0
+fi
+
+echo "[pre-commit] Running typecheck: $TYPECHECK_CMD"
+
+if ! $TYPECHECK_CMD; then
+  echo "" >&2
+  echo "[pre-commit] BLOCKED: typecheck failed." >&2
+  echo "[pre-commit] Fix the type errors above and try the commit again." >&2
+  echo "[pre-commit] To bypass for an emergency commit (use sparingly): git commit --no-verify" >&2
+  exit 1
+fi
+
+exit 0

@@ -1,0 +1,39 @@
+# Secrets
+.env
+.mcp.json
+**/.env.local
+
+# Local settings (per-machine Claude permissions)
+.claude/settings.local.json
+.claude/hooks_info/ccnotify.db
+.claude/hooks_info/ccnotify.log*
+
+# Installer state
+.claude/skills/_catalog/installed.json
+
+# Dev-only skills (not shipped to main)
+.claude/skills/ops-new-feature/
+.claude/skills/ops-release/
+
+# System
+.DS_Store
+.backup/
+.tmp/
+
+# Next.js / Node (inside project folders)
+**/node_modules/
+**/.next/
+**/next-env.d.ts
+
+# Command Centre data (inside project folders)
+**/.command-centre/
+
+# Agent worktrees (temporary, per-machine)
+.claude/worktrees/
+
+# SQLite databases (inside project folders)
+**/data.db
+
+# Cron runtime (logs and status are generated at runtime)
+cron/logs/
+cron/status/
