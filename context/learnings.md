@@ -37,6 +37,40 @@ Those stay authoritative. Self-learning is about *how broadly Claude is allowed 
 
 **Trigger to extend reconciliation:** if this stale-doc pattern recurs (e.g., AGENTS.md § Hooks drifts after a hook is added/removed), build a `meta-reconcile-docs` skill that diffs structural claims in AGENTS.md against actual file state. Until then, manual update at the end of each /tailor-os run is sufficient.
 
+### Two-layer typecheck: advisory at edit-time, strict at commit-time (locked 2026-04-28, /tailor-os Phase 8)
+
+The `typecheck-guard.js` Claude-side hook stays advisory (warns but doesn't block) on every edit. The strict gate that actually blocks lives one layer lower: `scripts/git-hooks/pre-commit` runs `pnpm tsc --noEmit` and exits non-zero on type errors, blocking the commit.
+
+**Reason:** per-edit blocking on TS errors creates 30-second iteration friction during exploratory debugging. That collides head-on with the `feedback_local_first` rule (debug locally, iterate fast). But "advisory only" means broken types can slip into commits. Splitting the gate to commit-time gives both: fast iteration during work + hard correctness at the boundary where it matters.
+
+**Why this is non-obvious:** typical advice is "pick one mode" — either always-block or always-warn. The split feels like over-engineering until you've felt both modes' downsides. Easy trap when re-tailoring: simplify by collapsing both layers into one, losing the reason the split exists.
+
+**Trigger to escalate edit-time to block:** if production bugs slip through that types would have caught at edit time (i.e., the commit-time gate is firing too late to be useful), set `TYPECHECK_GUARD_BLOCK=1` env var. Until then, the two-layer split is the right shape.
+
+### No mandatory services layer (locked 2026-04-28, /tailor-os Phase 4 → ADR-0003)
+
+`src/lib/services/` is **optional**. Supabase calls go directly from Server Components / Route Handlers via `src/lib/supabase/` clients. Refactor to services only when same Supabase logic duplicates **3+ places** OR when business rules start mixing with raw data access in the same function.
+
+**Reason:** typical Next.js + Supabase tutorials wire a services layer from day one, even on the smallest projects. In a solo-dev SaaS most code is read-once-then-deleted-or-rewritten — a pre-baked services layer creates empty folders, indirection, and abstraction that has to be maintained without earning its keep. Aligns with DEV_ETHOS rule "no premature abstractions".
+
+**Boundary:** this is for the **template default**. Per-app `apps/{slug}/code_context/architecture.md` overrides if an app has genuinely complex domain logic from day one (rare).
+
+**Why this is non-obvious:** "no services layer" feels sloppy in the abstract. The 3+ places trigger is a concrete safety net that catches the moment refactoring genuinely pays off. Easy trap: drift back to scaffolding services on every new app because that's what tutorials show.
+
+### "Trigger to expand" pattern for runbook + ops decisions (emerged 2026-04-28, /tailor-os Phase 5)
+
+When documenting an operational choice that uses the simple solution today but might need a bigger solution later, write the decision in a fixed shape:
+
+> "Right now we use [simple solution] because [reason]. Switch to [bigger solution] when [explicit trigger]."
+
+Phase 5 surfaced 4 instances of this shape organically in `runbook.md`: Local DB sharing the dev Supabase project (split when 2nd dev joins / seed clobbered / schema isolation needed / migration blocks preview), no on-call rotation (introduce when 2nd dev joins or customer SLA), no product analytics (add when a real product question requires it), no manual git tags (add when starting to publish release notes).
+
+**Reason:** "we use the simple thing" without a written trigger drifts into "we use the simple thing forever, even after the trigger has fired." Writing the trigger explicitly turns "should we expand this?" from a vague feeling into a yes/no check.
+
+**Why this is non-obvious:** runbooks usually describe current state ("we deploy via Vercel"). The expand-trigger shape is *forward-looking* — it pre-records the conditions under which today's choice becomes wrong. Easy to skip when writing because you don't know all triggers in advance — but writing the obvious one is better than writing none. Future-Pim/Claude can append more triggers when they come up.
+
+**Promotion candidate:** if this pattern keeps recurring across `code_context/` (architecture.md, conventions.md), promote it to a meta-convention in `DEV_ETHOS.md` — currently it lives implicitly in runbook only.
+
 ## What doesn't work well
 
 ---
