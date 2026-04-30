@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 100 students > produces expected totals for rekenwiskunde, nederlands, engels 1`] = `2394`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 100 students > produces expected totals for rekenwiskunde, nederlands, engels 2`] = `1256`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 100 students > produces expected totals for rekenwiskunde, nederlands, engels 3`] = `3726`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 500 students > produces expected totals for rekenwiskunde, nederlands, engels 1`] = `11970`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 500 students > produces expected totals for rekenwiskunde, nederlands, engels 2`] = `5965`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 500 students > produces expected totals for rekenwiskunde, nederlands, engels 3`] = `12465`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > engels:cito:pricePerStudent 1`] = `7.98`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > engels:cito:totalCost 1`] = `6384`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > engels:dia:pricePerStudent 1`] = `5.55`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > engels:dia:totalCost 1`] = `4440`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > engels:jij:pricePerStudent 1`] = `7.23`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > engels:jij:totalCost 1`] = `5784`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > nederlands:cito:pricePerStudent 1`] = `7.98`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > nederlands:cito:totalCost 1`] = `6384`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > nederlands:dia:pricePerStudent 1`] = `3.19`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > nederlands:dia:totalCost 1`] = `2552`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > nederlands:jij:pricePerStudent 1`] = `7.23`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > nederlands:jij:totalCost 1`] = `5784`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > rekenwiskunde:cito:pricePerStudent 1`] = `7.98`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > rekenwiskunde:cito:totalCost 1`] = `6384`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > rekenwiskunde:dia:pricePerStudent 1`] = `3.19`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > rekenwiskunde:dia:totalCost 1`] = `2552`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > rekenwiskunde:jij:pricePerStudent 1`] = `7.23`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected per-module prices > rekenwiskunde:jij:totalCost 1`] = `5784`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected totals for rekenwiskunde, nederlands, engels 1`] = `19152`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected totals for rekenwiskunde, nederlands, engels 2`] = `9544`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 800 students > produces expected totals for rekenwiskunde, nederlands, engels 3`] = `17352`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 1200 students > produces expected totals for rekenwiskunde, nederlands, engels 1`] = `28728`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 1200 students > produces expected totals for rekenwiskunde, nederlands, engels 2`] = `13560`;
+
+exports[`Calculator regression tests: known outputs for known inputs > school size: 1200 students > produces expected totals for rekenwiskunde, nederlands, engels 3`] = `23112`;
