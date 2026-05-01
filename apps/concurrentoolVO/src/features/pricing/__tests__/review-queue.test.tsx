@@ -98,6 +98,14 @@ const accountManagerAuth = {
   signOut: vi.fn(),
 };
 
+// Role used to verify access denial — neither manager nor accountmanager.
+const viewerAuth = {
+  user: { id: 'v-1' },
+  userProfile: { id: 'v-1', name: 'Vera Viewer', role: 'viewer' as const, email: 'vera@cito.nl', region: 'nl', teamId: 'team-1' },
+  loading: false,
+  signOut: vi.fn(),
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockFetchAuditLog.mockResolvedValue([]);
@@ -105,12 +113,22 @@ beforeEach(() => {
 
 describe('ReviewQueuePage', () => {
   it('shows "Geen toegang" for non-manager role', () => {
-    mockUseAuth.mockReturnValue(accountManagerAuth);
+    // viewer has neither manager nor accountmanager role; both are allowed.
+    mockUseAuth.mockReturnValue(viewerAuth);
     mockUsePriceProposals.mockReturnValue({ data: [], isLoading: false, error: null });
 
     render(<ReviewQueuePage />);
 
     expect(screen.getByText('Geen toegang')).toBeInTheDocument();
+  });
+
+  it('allows accountmanager role to access the review queue', () => {
+    mockUseAuth.mockReturnValue(accountManagerAuth);
+    mockUsePriceProposals.mockReturnValue({ data: [], isLoading: false, error: null });
+
+    render(<ReviewQueuePage />);
+
+    expect(screen.queryByText('Geen toegang')).not.toBeInTheDocument();
   });
 
   it('renders proposal list with ProposalBadge and PriceDiffDisplay', () => {
