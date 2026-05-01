@@ -125,6 +125,7 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
   const visibleProviders = usePriceComparisonStore((s) => s.visibleProviders);
   const { patterns } = useDiscountPatterns();
+  const isOffline = usePricingDataStore((s) => s.isOffline);
 
   const [chartHighlight] = useState<string | null>(null);
   const [useMarketPricing, setUseMarketPricing] = useState(false);
@@ -190,8 +191,6 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
       </div>
     );
   }
-
-  const isOffline = usePricingDataStore((s) => s.isOffline);
 
   return (
     <div>

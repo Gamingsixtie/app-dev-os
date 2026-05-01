@@ -27,13 +27,8 @@ export default function ConversationsTab() {
   const createActionMutation = useCreateAction();
   const deleteConversationMutation = useDeleteConversation();
 
-  if (!activeSchoolId) return null;
-
-  // Find the current school record for DiffView comparison
-  const school = schools.find(s => s.id === activeSchoolId);
-
   // System events are no longer embedded in school record; use empty array for now
-  const systemEvents: never[] = [];
+  const systemEvents: never[] = useMemo(() => [], []);
 
   // Build timeline events
   const timelineEvents = useMemo(
@@ -47,6 +42,17 @@ export default function ConversationsTab() {
     conversations.forEach(c => c.tags.forEach(t => tagSet.add(t)));
     return Array.from(tagSet).sort();
   }, [conversations]);
+
+  const handleNavigateToComparison = useCallback(() => {
+    if (slug) {
+      navigate({ to: '/scholen/$slug/vergelijking', params: { slug } });
+    }
+  }, [navigate, slug]);
+
+  if (!activeSchoolId) return null;
+
+  // Find the current school record for DiffView comparison
+  const school = schools.find(s => s.id === activeSchoolId);
 
   const handleEditConversation = (conversation: Conversation) => {
     setEditingConversation(conversation);
@@ -62,12 +68,6 @@ export default function ConversationsTab() {
     setConversationFormOpen(false);
     setEditingConversation(null);
   };
-
-  const handleNavigateToComparison = useCallback(() => {
-    if (slug) {
-      navigate({ to: '/scholen/$slug/vergelijking', params: { slug } });
-    }
-  }, [navigate, slug]);
 
   const handleCreateAction = async (conversationId?: string) => {
     const conv = conversations.find(c => c.id === conversationId);

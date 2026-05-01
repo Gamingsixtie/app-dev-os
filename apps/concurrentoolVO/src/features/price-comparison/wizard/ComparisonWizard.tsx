@@ -45,19 +45,6 @@ export function ComparisonWizard() {
     }
   }, [moduleSetups, schoolScenario, setScenario]);
 
-  // Empty state guard: no modules selected
-  if (selectedModules.length === 0) {
-    return (
-      <div className="max-w-[720px] mx-auto px-4 md:px-0">
-        <div className="bg-white rounded-xl border border-neutral-200 p-6 text-center">
-          <p className="text-sm text-neutral-500">
-            Selecteer eerst modules in de wizard om een vergelijking te starten.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // Build collapsed summary from selections
   const collapsedSummary = useMemo(() => {
     if (!hasCompletedOnce) return null;
@@ -77,6 +64,30 @@ export function ComparisonWizard() {
       samenvatting: aiAdvice?.samenvatting,
     };
   }, [hasCompletedOnce, adjustedSelections, variantSelections, aiAdvice]);
+
+  // Scenario C: user chooses competitor comparison from keuze-UI
+  const handleChooseCompetitor = useCallback(() => {
+    useWizardStore.getState().setScenario('alles-oud-cito-concurrent');
+    setStep(1);
+  }, [setStep]);
+
+  // User chooses migration from keuze-UI — set school scenario to B
+  const handleChooseMigration = useCallback(() => {
+    setSchoolScenario('B');
+  }, [setSchoolScenario]);
+
+  // Empty state guard: no modules selected
+  if (selectedModules.length === 0) {
+    return (
+      <div className="max-w-[720px] mx-auto px-4 md:px-0">
+        <div className="bg-white rounded-xl border border-neutral-200 p-6 text-center">
+          <p className="text-sm text-neutral-500">
+            Selecteer eerst modules in de wizard om een vergelijking te starten.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Collapsed state after wizard completion
   if (isCollapsed && hasCompletedOnce && collapsedSummary) {
@@ -126,17 +137,6 @@ export function ComparisonWizard() {
       </div>
     );
   }
-
-  // Scenario C: user chooses competitor comparison from keuze-UI
-  const handleChooseCompetitor = useCallback(() => {
-    useWizardStore.getState().setScenario('alles-oud-cito-concurrent');
-    setStep(1);
-  }, [setStep]);
-
-  // User chooses migration from keuze-UI — set school scenario to B
-  const handleChooseMigration = useCallback(() => {
-    setSchoolScenario('B');
-  }, [setSchoolScenario]);
 
   const handleStepClick = (step: 0 | 1 | 2) => {
     // Only allow clicking completed (earlier) steps
