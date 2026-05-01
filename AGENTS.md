@@ -215,6 +215,11 @@ Every skill and its output folder uses a category prefix.
 |-------|-------------|-----------|
 | `code-feature-build` | "build a feature", "implement", "add new endpoint", "create component for", "ship a feature" | `src/**`, `tests/**`, `code_context/architecture.md` (when shape shifts) |
 | `code-review` | "review this", "code review", "check this PR", "spot bugs", "lgtm?" | inline PR comments or `REVIEW.md` |
+| `code-frontend-design` ⚠ | "distinctive design", "creative frontend", "avoid AI slop", "build web components" | source code in app being designed |
+| `code-interface-design` ⚠ | "dashboard design", "admin panel", "SaaS UI", "interface design" — NOT marketing pages | source code + optional `system.md` per project |
+| `code-ui-design-system` ⚠ | "design tokens", "color palette", "typography scale", "design system", "developer handoff" | `projects/code-ui-design-system/` (currently inconsistent — see refactor plan) |
+
+⚠ *= imported from upstream rekentool repo. Methodologically incomplete (oversized SKILL.md / missing canonical sections / no negative-triggers / no output paths). Not refactored proactively — trigger-rule defined in [`projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md`](projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md).*
 
 ### Test Skills
 
@@ -241,6 +246,14 @@ Every skill and its output folder uses a category prefix.
 | `ops-cron` | "schedule a job", "cron job", "automate daily", "recurring task", "list jobs", "start crons", "stop crons" |
 | `ops-new-feature` (when added) | "new feature", "start feature", "merge feature", "feature done" |
 | `ops-release` (when added) | "release", "cut a release", "bump version", "ship it" |
+
+### Tool Skills
+
+| Skill | Triggers on | Writes to |
+|-------|-------------|-----------|
+| `tool-web-asset-generator` ⚠ | "favicon", "app icon", "PWA icon", "Open Graph image", "social media image", "OG image" | `projects/tool-web-asset-generator/` (currently inconsistent — see refactor plan) |
+
+⚠ *= same caveat as Code Skills above. See [`projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md`](projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md) for refactor backlog.*
 
 *Optional skills are auto-registered by reconciliation when their folders appear on disk. Install with `bash scripts/add-skill.sh <name>`.*
 

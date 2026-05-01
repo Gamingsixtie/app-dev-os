@@ -134,6 +134,22 @@ One section per skill. Skill folder name = section heading. Skills read only the
 
 ## code-review
 
+## code-frontend-design
+
+> Imported from upstream rekentool repo on 2026-05-01. Methodology gaps documented in `projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md`. Refactor-trigger: ≥3 entries here OR ≥3 files in `projects/code-frontend-design/` OR active friction during use.
+
+## code-interface-design
+
+> Imported from upstream rekentool repo on 2026-05-01. Methodology gaps documented in `projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md`. Refactor-trigger: ≥3 entries here OR ≥3 files in `projects/code-interface-design/` OR active friction during use.
+
+## code-ui-design-system
+
+> Imported from upstream rekentool repo on 2026-05-01. Methodology gaps documented in `projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md`. Refactor-trigger: ≥3 entries here OR ≥3 files in `projects/code-ui-design-system/` OR active friction during use.
+
+## tool-web-asset-generator
+
+> Imported from upstream rekentool repo on 2026-05-01. Methodology gaps documented in `projects/ops-skill-refactor/2026-05-01_skill-quality-plan.md`. Refactor-trigger: ≥3 entries here OR ≥3 files in `projects/tool-web-asset-generator/` OR active friction during use.
+
 ## code-refactor
 
 ## test-write-unit

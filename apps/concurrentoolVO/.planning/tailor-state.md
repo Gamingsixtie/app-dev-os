@@ -1,7 +1,8 @@
 ---
 project: concurrentoolVO-per-app-tailoring
-status: pending
+status: completed
 created: 2026-04-30
+completed: 2026-05-01
 imported_from: https://github.com/Gamingsixtie/concurrentie-rekentool-VO
 imported_via: git subtree add --squash (upstream commit 814ec61)
 imported_at: 2026-04-30
@@ -55,12 +56,12 @@ When the next tailoring session runs, read in this order:
 
 | # | Phase | Effort | Where to run |
 |---|---|---|---|
-| 1 | **Bootstrap skeleton** — mkdir `brand_context/`, `code_context/`, `context/`, `.claude/skills/`, `ADR/`, `projects/`, `cron/jobs/`. Create stub `AGENTS.md` + reconcile existing `CLAUDE.md` to wrap `@AGENTS.md`. | 15 min | from `app-dev-os/` root |
-| 2 | **code_context override** — `architecture.md` (Vite 8 + React 19 + TanStack Router/Query + Zustand + Tailwind v4 + Vercel Functions + Supabase + Dexie + PWA), `conventions.md` (NL-UI / EN-code rule, locked files, ESLint config still in repo despite Biome decision in template — note as override), `runbook.md` (real Vercel URLs, real Supabase project, deploy flow). | 45 min | from `apps/concurrentoolVO/` |
-| 3 | **brand_context override** — voice (likely Cito-formal, deviates from template neutral default), ICP (scholen/docenten/leerlingen), positioning (concurrentie-vergelijkings-tool met drie providers Cito/DIA/JIJ). | 30 min | from `apps/concurrentoolVO/` |
-| 4 | **Reconcile pre-existing `CLAUDE.md`** — preserve rekentool runtime rules, add `@AGENTS.md` import at top, drop anything that conflicts with App-Dev OS root rules. | 15 min | `apps/concurrentoolVO/CLAUDE.md` |
-| 5 | **Review existing `skills/`** — migrate to `.claude/skills/` (App-Dev OS convention) or leave at top-level (current state). Decide per skill: app-specific stays per-app, generic-useful gets promoted to root. | 30 min | discussion + moves |
-| 6 | **Promote app-specific decisions to ADRs** — Vite-not-Next.js, Zustand-not-Redux, three engines as pure functions, Supabase RLS-on, locked-files pattern, structured-output AI via Zod, NL/EN language convention. | 45 min | `docs-adr` skill |
+| 1 | **Bootstrap skeleton** — mkdir `brand_context/`, `code_context/`, `context/`, `.claude/skills/`, `ADR/`, `projects/`, `cron/jobs/`. Create stub `AGENTS.md` (CLAUDE.md reconcile is Phase 4, deferred). | **completed 2026-05-01** | from `app-dev-os/` root |
+| 2 | **code_context override** — `architecture.md` (Vite 8 + React 19 + TanStack Router/Query + Zustand + Tailwind v4 + Vercel Functions + Supabase + Dexie + PWA), `conventions.md` (NL-UI / EN-code rule, locked files, ESLint config still in repo despite Biome decision in template — note as override), `runbook.md` (real Vercel URLs, real Supabase project, deploy flow). | **completed 2026-05-01** | from `apps/concurrentoolVO/` |
+| 3 | **brand_context override** — voice (likely Cito-formal, deviates from template neutral default), ICP (scholen/docenten/leerlingen), positioning (concurrentie-vergelijkings-tool met drie providers Cito/DIA/JIJ). | **completed 2026-05-01** | from `apps/concurrentoolVO/` |
+| 4 | **Reconcile pre-existing `CLAUDE.md`** — preserve rekentool runtime rules, add `@AGENTS.md` import at top, drop anything that conflicts with App-Dev OS root rules. | **completed 2026-05-01** | `apps/concurrentoolVO/CLAUDE.md` |
+| 5 | **Review existing `skills/`** — migrate to `.claude/skills/` (App-Dev OS convention) or leave at top-level (current state). Decide per skill: app-specific stays per-app, generic-useful gets promoted to root. | **completed 2026-05-01** | 5 skills audited + 4 promoted to root + 1 kept per-app + refactor-plan deferred to `projects/ops-skill-refactor/` |
+| 6 | **Promote app-specific decisions to ADRs** — Vite-not-Next.js, Zustand-not-Redux, three engines as pure functions, Supabase RLS-on, locked-files pattern, structured-output AI via Zod, NL/EN language convention. | **completed 2026-05-01** | 3 ADRs written (Vite, three-providers, pure-engines). Other 9 candidates listed in `ADR/README.md` for promotion-on-trigger. AI-only-intake flagged as borderline → promote if pricing-AI feature ever requested. |
 
 After phase 6: `status: completed` here, log entry per phase, ready for daily work in this app with full App-Dev OS context.
 

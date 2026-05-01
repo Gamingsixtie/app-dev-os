@@ -2,6 +2,8 @@
 
 React SPA (Vite + TypeScript + Tailwind v4) waarmee Cito-consultants de kosten vergelijken tussen toetsaanbieders (Cito, DIA, JIJ) voor Nederlandse middelbare scholen. Wizard verzamelt schoolprofiel → engine berekent prijzen → vergelijkingsoverzicht.
 
+@AGENTS.md
+
 # Commands
 
 ```bash
@@ -11,6 +13,8 @@ npm run lint      # ESLint
 npx vitest run    # Alle tests
 npx vitest        # Watch mode
 ```
+
+> Volledige command-tabel (incl. e2e, preview, `vercel dev`, lint variants) komt in `code_context/conventions.md` (Phase 2 van per-app tailoring).
 
 # Rules
 
@@ -67,7 +71,7 @@ Intake/Wizard → `useSchoolProfileStore` → `usePriceComparisonStore.initializ
 
 # Workflow
 
-- IMPORTANT: Na elke goedgekeurde wijziging (bugfix, feature, verbetering): automatisch committen EN pushen naar remote. Niet wachten tot de gebruiker erom vraagt. Build moet eerst slagen.
+- Commit-and-push policy: see [`AGENTS.md`](AGENTS.md) § App-specific overrides — App-Dev OS branch-guard supersedes auto-push (commit after approval is fine; push to `main` requires PR + explicit OK)
 - IMPORTANT: Run `npm run build` voordat je klaar bent — moet slagen zonder errors
 - Bij engine-wijzigingen: run `npx vitest run` en controleer dat alle tests slagen
 - Nieuwe wizard step? Maak component + Zod schema + test — alle drie
