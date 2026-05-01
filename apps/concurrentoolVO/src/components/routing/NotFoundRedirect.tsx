@@ -6,10 +6,16 @@ interface NotFoundRedirectProps {
 
 export default function NotFoundRedirect({ show }: NotFoundRedirectProps) {
   const [visible, setVisible] = useState(show);
+  // Track previous `show` so we can re-open the banner when it flips from
+  // false → true without setting state synchronously inside an effect.
+  const [prevShow, setPrevShow] = useState(show);
+  if (show !== prevShow) {
+    setPrevShow(show);
+    if (show) setVisible(true);
+  }
 
   useEffect(() => {
     if (show) {
-      setVisible(true);
       const timer = setTimeout(() => setVisible(false), 5000);
       return () => clearTimeout(timer);
     }
