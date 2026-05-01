@@ -68,6 +68,43 @@
 - User-facing error messages use brand-voice (load `brand_context/voice-profile.md` when writing them)
 - Never expose stack traces, raw DB errors, or internal IDs to the client
 
+## Client storage strategy
+
+Apply these rules **before** adding any new form, wizard, or data-saving feature.
+This prevents the localStorage-vs-server drift that silently destroys user data.
+
+1. **Server is the truth.** Supabase holds the canonical version of every piece
+   of user data. Client storage (localStorage, IndexedDB, Zustand state) is a
+   *cache* of that truth — never the truth itself.
+
+2. **No primary persistence in localStorage.** Anything the user expects to be
+   "saved" must reach the server before the UI says "saved". A green checkmark
+   without a confirmed server write is a lie.
+
+3. **Three legitimate uses for client storage:**
+   - **UI state cache** — dashboard layouts, expanded panels, theme. Loss is harmless.
+   - **Optimistic-update working copy** — show the new value instantly while the
+     server write is in flight. Roll back on failure.
+   - **Offline queue** — queued mutations when the network is gone. Must have a
+     deterministic flush + verify cycle when network returns.
+
+4. **Save-strategy decision is required up-front.** Pick one per feature and
+   document it inline; never default to "Zustand persist will handle it":
+   - **Per-keystroke autosave** (debounced) — long forms; needs visible "saving…" / "saved" state.
+   - **Per-step save** — wizards; each step transition writes to server, blocks
+     transition on failure.
+   - **Explicit save button** — short forms; user-controlled.
+
+5. **Always read-back after a mutation.** After `INSERT`/`UPDATE`/`DELETE` to
+   Supabase, refetch the affected query (TanStack Query `invalidateQueries` or
+   explicit `SELECT`) and surface failures loudly. "No error returned" is not
+   the same as "write succeeded".
+
+6. **Never trust localStorage to survive.** Browser storage is wiped by private
+   mode, extensions, "clear site data", storage quotas, or logging in on a
+   different device. If data only exists in localStorage, it is *temporarily
+   there*, not *saved*.
+
 ## Comments
 
 - Default: no comments
@@ -88,6 +125,9 @@
 - `useEffect` for data fetching when a Server Component or native `fetch` works
 - Mixing client and server code in one file without a `'use client'` / `'use server'` directive
 - `npm install` / `yarn add` in this project → only `pnpm` commands
+- Zustand `persist` middleware (or any localStorage-backed state) as the
+  primary store for user-submitted data → see § Client storage strategy. Use
+  for UI state cache, optimistic working copies, or offline queues only.
 
 ---
 
