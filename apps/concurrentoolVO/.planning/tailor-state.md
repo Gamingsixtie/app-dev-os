@@ -120,9 +120,13 @@ Skeleton (phase 1) is auto-generated → start at phase 2. Source code goes into
 | App-specific skills (rare — usually generic skills go in root) | `apps/<slug>/.claude/skills/*` |
 | App-specific cron jobs (rare — root jobs scan apps/* already) | `apps/<slug>/cron/jobs/*.md` |
 
-### Open meta-question (defer until first failure makes it concrete)
+### Open meta-question — DEFERRED (decision: 2026-05-01)
 
-The root pre-commit typecheck (`scripts/git-hooks/pre-commit`) only checks `tsconfig.json` at repo root. Per-app `tsconfig.json` files (like `apps/concurrentoolVO/tsconfig.json`) are NOT checked at commit-time. If type-errors slip into a per-app commit, that's the trigger to extend the pre-commit hook to walk into changed `apps/*/tsconfig.json` files. Until then: trust per-app dev-time iteration + Vercel build will fail loudly on broken types.
+The root pre-commit typecheck (`scripts/git-hooks/pre-commit`) only checks `tsconfig.json` at repo root. Per-app `tsconfig.json` files (like `apps/concurrentoolVO/tsconfig.json`) are NOT checked at commit-time. If type-errors slip into a per-app commit, that's the trigger to extend the pre-commit hook to walk into changed `apps/*/tsconfig.json` files.
+
+**Decision (2026-05-01):** keep deferred per `feedback_breadth_over_preemptive_scope` memory rule. During the full basis-fix sweep on `feature/fix-basis-checks` (16 commits across rules-of-hooks, set-state-in-effect, vitest failures, npm audit, ESLint cleanup, bundle optimization), TypeScript was clean before and after every phase. No type-errors slipped through, so no concrete trigger has fired. Until one does, trust per-app dev-time iteration + Vercel build (which DOES fail loudly on broken types).
+
+**Concrete trigger to revisit:** a `git push` to a feature branch that produces a Vercel build failure with type-errors that would have been caught by `npx tsc -b` inside `apps/<slug>/`. When that happens, extend `scripts/git-hooks/pre-commit` to detect changed `apps/*/tsconfig.json` files and run `npx tsc -b` per affected app.
 
 ### Vercel deploy migration (per app, separate decision)
 
