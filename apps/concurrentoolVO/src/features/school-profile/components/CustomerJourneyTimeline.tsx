@@ -378,5 +378,6 @@ export default function CustomerJourneyTimeline({
 }
 
 // Export buildJourneyTimeline for testing
+// eslint-disable-next-line react-refresh/only-export-components -- exported for unit tests; splitting requires moving large pure helper to .utils file
 export { buildJourneyTimeline };
 export type { JourneyEntry, JourneyEntryType };

@@ -84,6 +84,7 @@ export default function StreamingExtraction({ fields }: StreamingExtractionProps
  * Default streaming field labels in order.
  * Used by ConversationForm to initialize the streaming extraction display.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- small constant co-located with the component that defines its contract
 export const STREAMING_FIELD_LABELS = [
   'Niveaus',
   'Leerlingen',

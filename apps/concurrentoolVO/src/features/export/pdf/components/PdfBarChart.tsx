@@ -36,6 +36,7 @@ const eurFormatter = new Intl.NumberFormat('nl-NL', {
  * Pure function that calculates bar positions and dimensions.
  * Extracted for unit testing without @react-pdf/renderer dependencies.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- PDF components are rarely dev-iterated; HMR loss acceptable
 export function calculateBarLayout(
   data: BarChartItem[],
   width = 400,
@@ -74,6 +75,7 @@ export function calculateBarLayout(
 }
 
 /** Provider color mapping */
+// eslint-disable-next-line react-refresh/only-export-components -- PDF components are rarely dev-iterated; HMR loss acceptable
 export const PROVIDER_CHART_COLORS: Record<string, string> = {
   cito: CITO_COLORS.primary,    // #003082
   dia: CITO_COLORS.accent,      // #FF6600

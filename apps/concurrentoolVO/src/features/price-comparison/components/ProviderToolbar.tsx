@@ -5,6 +5,7 @@ import { MODULE_CATALOG } from '@/models/modules';
 import { PricingInfoPopover } from './PricingInfoPopover';
 
 /** Provider brand colors — bg variants for dots and cards. */
+// eslint-disable-next-line react-refresh/only-export-components -- shared color constant used across 3 components; co-located with toolbar by convention
 export const PROVIDER_COLORS: Record<ProviderKey, string> = {
   cito: 'bg-[#003082]',
   dia: 'bg-[#FF6600]',

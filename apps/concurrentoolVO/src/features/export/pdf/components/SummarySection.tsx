@@ -16,6 +16,7 @@ function formatEuro(amount: number): string {
   }).format(amount);
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- PDF components are rarely dev-iterated; HMR loss acceptable
 export function getSummaryBullets(data: ReportData, focus: ReportSections['summaryFocus']): string[] {
   const bullets: string[] = [];
 
