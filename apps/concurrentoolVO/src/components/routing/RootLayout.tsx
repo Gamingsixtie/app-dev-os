@@ -24,7 +24,23 @@ export default function RootLayout() {
   const routerState = useRouterState();
   const isLoginPage = routerState.location.pathname === '/login';
 
-  const [needsMigration, setNeedsMigration] = useState<boolean | null>(null);
+  // When SKIP_AUTH is on we never gate on migration, so seed the initial state
+  // accordingly and short-circuit the effect below — avoids a synchronous
+  // setState inside useEffect (set-state-in-effect anti-pattern).
+  const [needsMigration, setNeedsMigration] = useState<boolean | null>(
+    SKIP_AUTH ? false : null,
+  );
+
+  // Reset needsMigration to null while auth is still loading or the user is
+  // logged out, by comparing against the previous render. Doing this in render
+  // (not in an effect) avoids triggering a cascading render via setState in
+  // useEffect.
+  const authPending = !SKIP_AUTH && (!user || loading);
+  const [prevAuthPending, setPrevAuthPending] = useState(authPending);
+  if (prevAuthPending !== authPending) {
+    setPrevAuthPending(authPending);
+    if (authPending) setNeedsMigration(null);
+  }
 
   // Sync offline mutation queue when coming back online
   useEffect(() => {
@@ -44,11 +60,11 @@ export default function RootLayout() {
   // Check for local data migration after auth completes
   useEffect(() => {
     if (SKIP_AUTH) {
-      setNeedsMigration(false);
+      // Initial state already seeded to false; no work to do.
       return;
     }
     if (!user || loading) {
-      setNeedsMigration(null);
+      // Reset to null is handled in the render-phase block above.
       return;
     }
 
