@@ -57,11 +57,14 @@ const DEMO_PROPOSALS: PriceProposal[] = [
 export default function ReviewQueuePage() {
   const { userProfile } = useAuth();
   const [filters, setFilters] = useState<ReviewFilters>({});
-  const [showDemo, setShowDemo] = useState(true);
+  // Demo data is only shown in `vite dev`; production and vitest render the
+  // real (or empty) list so users don't see fake proposals as real data.
+  // (Note: vitest sets DEV=true by default, so we check MODE explicitly.)
+  const [showDemo, setShowDemo] = useState(import.meta.env.MODE === 'development');
 
   const { data: proposals, isLoading, error } = usePriceProposals(filters);
 
-  // Use demo data when no real proposals exist or query fails
+  // Use demo data when no real proposals exist (dev only) or query fails
   const displayProposals = useMemo(() => {
     const real = (!error && proposals) ? proposals : [];
     if (real.length > 0) return real;
@@ -86,7 +89,25 @@ export default function ReviewQueuePage() {
     );
   }
 
-  // Error is handled gracefully — demo data shown as fallback
+  // Error state — surface load failures explicitly rather than silently
+  // falling back to demo data, so users know when data is stale or missing.
+  if (!isLoading && error) {
+    return (
+      <div className="max-w-4xl mx-auto px-8 py-8">
+        <h1 className="text-xl font-semibold text-neutral-900 mb-2">Prijsvoorstellen</h1>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-6 mt-4">
+          <h2 className="text-base font-semibold text-red-900 mb-2">
+            Prijsvoorstellen konden niet worden geladen
+          </h2>
+          <p className="text-sm text-red-700">
+            Er ging iets mis bij het ophalen van de prijsvoorstellen. Probeer de
+            pagina opnieuw te laden of neem contact op met support als het
+            probleem aanhoudt.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Sort proposals: newest first
   const sortedProposals = [...displayProposals].sort(
