@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from '@/lib/supabase/client';
 
 /** Tables that can be queued for offline mutation sync */
 export type OfflineQueueTable = 'schools' | 'contacts' | 'conversations' | 'actions' | 'school_prices' | 'system_events' | 'schoolplan_analyses' | 'planned_touchpoints';
@@ -46,9 +47,6 @@ export const useOfflineQueue = create<OfflineQueueState>()(
         const { mutations } = get();
         if (mutations.length === 0) return { synced: 0, conflicts: 0 };
 
-        // Import supabase client dynamically to avoid circular deps
-        const { supabase } = await import('@/lib/supabase/client');
-
         let synced = 0;
         let conflicts = 0;
 
@@ -84,13 +82,15 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             }
 
             // --- APPLY MUTATION ---
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- payload is dynamic from queue
+             
             switch (mutation.operation) {
               case 'insert':
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- payload shape varies per dynamic table; supabase generics don't accept Record<string, unknown>
                 await supabase.from(tbl).insert(mutation.payload as any);
                 break;
               case 'update': {
                 const { id: rowId, ...rest } = mutation.payload;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- update payload shape varies per dynamic table; supabase generics don't accept Record<string, unknown>
                 await supabase.from(tbl).update(rest as any).eq('id', rowId as string);
                 break;
               }

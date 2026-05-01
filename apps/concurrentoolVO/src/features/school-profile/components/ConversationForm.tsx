@@ -6,7 +6,7 @@ import type { z } from 'zod';
 import { conversationSchema } from '@/features/school-profile/schemas/conversation.schema';
 import { addConversation, updateConversation, addContact, addAction, updateSchoolData } from '@/db/operations';
 import type { Contact, Conversation, ActionItem, SchoolRecord } from '@/db/types';
-import type { DMUPosition, Scenario } from '@/models/school';
+import type { DMUPosition, Scenario, SchoolLevel } from '@/models/school';
 import { DMU_POSITION_LABELS } from '@/models/school';
 import { ENGAGEMENT_STATUS_LABELS } from '@/models/school';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
@@ -276,7 +276,7 @@ export default function ConversationForm({
       if (selection.levels?.length > 0) {
         const storeNow = useSchoolProfileStore.getState();
         if (storeNow.levels.length === 0) {
-          storeNow.setLevels(selection.levels as any);
+          storeNow.setLevels(selection.levels as SchoolLevel[]);
         }
         if (selection.studentCountsPerLevel && Object.keys(storeNow.studentCounts).length === 0) {
           // Convert per-level totals to per-year format (year 1 = total)
