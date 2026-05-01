@@ -4,6 +4,7 @@
  */
 
 import { parseSSEChunk } from './ai-intake';
+import { supabase } from '@/lib/supabase/client';
 import type {
   ExtractedVariantResult,
   WizardAdviceResult,
@@ -22,7 +23,6 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     return headers;
   }
 
-  const { supabase } = await import('@/lib/supabase/client');
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Niet ingelogd. Log opnieuw in om AI-functies te gebruiken.');
 
