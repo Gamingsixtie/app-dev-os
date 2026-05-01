@@ -14,7 +14,9 @@ jobs:
       config-changed: ${{ steps.filter.outputs.config }}
       content-only: ${{ steps.filter.outputs.content-only }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - id: filter
         name: Classify changed files into zones
@@ -73,10 +75,10 @@ jobs:
     if: needs.detect-zones.outputs.content-only != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
