@@ -28,7 +28,7 @@ vi.mock('@/db/operations', () => ({
   mapActionRow: (...args: unknown[]) => mockMapActionRow(...args),
 }));
 
-import { useActions, useCreateAction, useUpdateAction, useDeleteAction } from '../useActions';
+import { useActions, useCreateAction, useDeleteAction } from '../useActions';
 
 function createWrapper() {
   const qc = new QueryClient({

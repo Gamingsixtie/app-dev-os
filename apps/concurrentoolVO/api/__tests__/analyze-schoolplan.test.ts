@@ -50,7 +50,6 @@ import {
   POST,
 } from '../analyze-schoolplan';
 import { PDFParse } from 'pdf-parse';
-import mammoth from 'mammoth';
 
 describe('extractTextFromFile', () => {
   beforeEach(() => {

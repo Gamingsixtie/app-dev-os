@@ -31,7 +31,7 @@ vi.mock('@/db/operations', () => ({
   mapContactRow: (...args: unknown[]) => mockMapContactRow(...args),
 }));
 
-import { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from '../useContacts';
+import { useContacts, useCreateContact, useDeleteContact } from '../useContacts';
 
 function createWrapper() {
   const qc = new QueryClient({

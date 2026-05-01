@@ -22,7 +22,7 @@ test.describe('Price comparison views', () => {
   test('comparison route exists in router', async ({ page }) => {
     // This verifies the route configuration is correct
     // Without a school, it should redirect, but the route should not 404
-    const response = await page.goto('/scholen/test/vergelijking');
+    await page.goto('/scholen/test/vergelijking');
 
     // Page should render (even if redirected)
     await expect(page.locator('body')).toBeVisible();

@@ -4,10 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 // Mock supabase client
-const mockSelect = vi.fn();
-const mockInsert = vi.fn();
-const mockUpdate = vi.fn();
-const mockDelete = vi.fn();
 const mockFrom = vi.fn();
 
 vi.mock('@/lib/supabase/client', () => ({
@@ -19,9 +15,7 @@ vi.mock('@/lib/supabase/client', () => ({
 import {
   useSchoolPrices,
   useCreateSchoolPrice,
-  useUpdateSchoolPrice,
   useDeleteSchoolPrice,
-  useActivateSchoolPrice,
 } from '../useSchoolPrices';
 
 function createWrapper() {
