@@ -37,3 +37,7 @@
 # Cron runtime (logs and status are generated at runtime)
 cron/logs/
 cron/status/
+
+# Workflows held back pending gh auth workflow scope
+# Restore: run `gh auth refresh -s workflow`, remove this block, then commit + push the .github/workflows/ files
+.github/workflows/
