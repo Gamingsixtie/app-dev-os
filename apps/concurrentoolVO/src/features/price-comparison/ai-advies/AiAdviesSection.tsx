@@ -4,7 +4,7 @@
  * Expanded: full AI analysis flow with SchoolplanContextCard, ComparisonWizard, AnalysisPanel.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useWizardStore } from '../wizard/wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { SchoolplanContextCard } from './SchoolplanContextCard';
@@ -23,14 +23,16 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
   const shouldAutoTriggerAnalysis = useWizardStore((s) => s.shouldAutoTriggerAnalysis);
   const cachedSamenvatting = useWizardStore((s) => s.cachedAnalysisResult?.samenvatting ?? null);
 
-  const [expanded, setExpanded] = useState(false);
-
-  // Auto-expand when wizard triggers analysis so user sees it generating
-  useEffect(() => {
-    if (shouldAutoTriggerAnalysis) {
-      setExpanded(true);
-    }
-  }, [shouldAutoTriggerAnalysis]);
+  // Seed expanded directly from the wizard trigger so the initial render is
+  // already correct, then track previous values during render to handle the
+  // case where shouldAutoTriggerAnalysis flips true after mount. This avoids
+  // the set-state-in-effect anti-pattern.
+  const [expanded, setExpanded] = useState(shouldAutoTriggerAnalysis);
+  const [prevAutoTrigger, setPrevAutoTrigger] = useState(shouldAutoTriggerAnalysis);
+  if (prevAutoTrigger !== shouldAutoTriggerAnalysis) {
+    setPrevAutoTrigger(shouldAutoTriggerAnalysis);
+    if (shouldAutoTriggerAnalysis) setExpanded(true);
+  }
 
   if (selectedModules.length === 0) return null;
 
