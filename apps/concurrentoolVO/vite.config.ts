@@ -68,7 +68,31 @@ export default defineConfig(({ mode }) => {
       })] : []),
     ],
     resolve: { alias: { '@': '/src' } },
-    build: { sourcemap: true },
+    build: {
+      sourcemap: true,
+      rolldownOptions: {
+        output: {
+          // Split vendor libraries into named chunks so the main app chunk
+          // stays small and route chunks load fast. Vite 8 / Rolldown only
+          // accepts the function form of manualChunks.
+          manualChunks: (id: string) => {
+            if (!id.includes('node_modules')) return undefined;
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/scheduler/')
+            ) {
+              return 'react-vendor';
+            }
+            if (id.includes('@tanstack/')) return 'tanstack-vendor';
+            if (id.includes('@supabase/')) return 'supabase-vendor';
+            if (id.includes('@sentry/')) return 'sentry-vendor';
+            if (id.includes('/dexie')) return 'dexie-vendor';
+            return undefined;
+          },
+        },
+      },
+    },
     server: { port: 3000 },
   };
 });
