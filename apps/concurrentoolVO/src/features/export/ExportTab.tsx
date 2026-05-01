@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { usePriceComparisonStore } from '@/features/price-comparison/store';
@@ -32,10 +32,14 @@ export default function ExportTab() {
     () => getDefaultAssumptions(config.dmuTarget)
   );
 
-  // Reset assumptions when DMU target changes
-  useEffect(() => {
+  // Reset assumptions when DMU target changes — done during render via a
+  // previous-prop comparison instead of useEffect, which is the React-recommended
+  // pattern for derived state and avoids the set-state-in-effect anti-pattern.
+  const [prevDmuTarget, setPrevDmuTarget] = useState(config.dmuTarget);
+  if (prevDmuTarget !== config.dmuTarget) {
+    setPrevDmuTarget(config.dmuTarget);
     setAssumptions(getDefaultAssumptions(config.dmuTarget));
-  }, [config.dmuTarget]);
+  }
 
   // School data
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
