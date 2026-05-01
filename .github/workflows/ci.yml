@@ -35,8 +35,11 @@ jobs:
             FOLDER_NAME=$(basename "$skill_dir")
             [ "$FOLDER_NAME" = "_catalog" ] && continue
 
-            # Extract name from YAML frontmatter
-            YAML_NAME=$(sed -n '/^---$/,/^---$/{ /^name:/s/^name: *//p }' "$SKILL_FILE" | tr -d '"')
+            # Extract YAML frontmatter (between first two --- markers, body --- ignored)
+            FRONTMATTER=$(awk 'NR==1 && /^---$/{flag=1; next} flag && /^---$/{exit} flag' "$SKILL_FILE")
+
+            # Extract name field
+            YAML_NAME=$(echo "$FRONTMATTER" | sed -n '/^name:/s/^name: *//p' | tr -d '"' | head -1)
 
             if [ "$YAML_NAME" != "$FOLDER_NAME" ]; then
               echo "ERROR: $SKILL_FILE — name '$YAML_NAME' does not match folder '$FOLDER_NAME'"
@@ -44,7 +47,6 @@ jobs:
             fi
 
             # Frontmatter length check (max 1024 chars per Claude Code spec)
-            FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$SKILL_FILE")
             FM_LENGTH=${#FRONTMATTER}
             if [ "$FM_LENGTH" -gt 1024 ]; then
               echo "ERROR: $SKILL_FILE — frontmatter is ${FM_LENGTH} chars (max 1024)"
