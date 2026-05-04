@@ -154,13 +154,25 @@ function runJob(job) {
     '--permission-mode', 'bypassPermissions',
   ];
 
+  // Avoid Node's DEP0190: don't combine args-array with shell:true. On
+  // Windows we need shell:true so `claude.cmd` resolves, so we pass a
+  // single command-string with empty args. Args are static — no injection
+  // surface here. On Unix we don't need shell at all.
   let child;
   try {
-    child = spawn(claudeCmd, args, {
-      cwd: REPO_ROOT,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      shell: process.platform === 'win32',
-    });
+    if (process.platform === 'win32') {
+      const cmdString = [claudeCmd, ...args].join(' ');
+      child = spawn(cmdString, [], {
+        cwd: REPO_ROOT,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        shell: true,
+      });
+    } else {
+      child = spawn(claudeCmd, args, {
+        cwd: REPO_ROOT,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+    }
   } catch (err) {
     log(`✗ Failed to spawn claude for ${job.slug}: ${err.message}`);
     return;
