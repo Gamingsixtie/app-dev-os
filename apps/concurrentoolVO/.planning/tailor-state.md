@@ -137,3 +137,5 @@ Currently each imported app's Vercel deploy still points at its own upstream Git
 3. First deploy from new source = ~15 min validate that it matches old deploy
 
 Defer until App-Dev OS is git-pushed and you're ready to flip. The subtree import doesn't require this — it's only needed if you want App-Dev OS itself to be the deployment source.
+
+**Status update (2026-05-05):** App-Dev OS is now pushed to `Gamingsixtie/app-dev-os`. Decision deferred per Pim — first verbeteren we de app lokaal, daarna pas flip. Detailed step-by-step plan prepared in [`projects/ops-vercel-flip/2026-05-05_flip-plan.md`](../../../projects/ops-vercel-flip/2026-05-05_flip-plan.md). Trigger to execute: Pim signals "doe de Vercel flip" when comfortable with the monorepo workflow.
