@@ -153,6 +153,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Dev-only auto-login. When VITE_DEV_AUTOLOGIN_EMAIL + VITE_DEV_AUTOLOGIN_PASSWORD
+  // are set in .env.local AND no session was restored on mount, sign in automatically
+  // so the developer doesn't have to retype credentials every reload. These env
+  // vars are NEVER set on Vercel production builds, so this is a no-op in prod
+  // (Vite tree-shakes the branch when import.meta.env.VITE_DEV_AUTOLOGIN_* is undefined).
+  useEffect(() => {
+    const devEmail = import.meta.env.VITE_DEV_AUTOLOGIN_EMAIL;
+    const devPassword = import.meta.env.VITE_DEV_AUTOLOGIN_PASSWORD;
+    if (!devEmail || !devPassword) return;
+    if (loading) return; // wait for INITIAL_SESSION to settle
+    if (user) return;    // already signed in (existing session restored)
+
+    void supabase.auth.signInWithPassword({
+      email: devEmail,
+      password: devPassword,
+    }).then(({ error }) => {
+      if (error) {
+        console.warn('[dev auto-login] failed:', error.message);
+      }
+    });
+  }, [loading, user]);
+
   const signIn = useCallback(
     async (
       email: string,
