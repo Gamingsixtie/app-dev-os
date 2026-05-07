@@ -55,11 +55,13 @@ shared `code_context/`, `AGENTS.md`, root `.github/workflows/`,
 
 - [x] Exploration done — decisions locked in [.planning/notes/otap-framework-decisions.md](../../.planning/notes/otap-framework-decisions.md)
 - [x] Spec locked — see `SPEC.md` in this folder (9 requirements + 7 decisions confirmed 2026-05-07)
-- [ ] Plan phase
-- [ ] Execute phase
-- [ ] ADR + rollout to first app
+- [x] Plan drafted — see `PLAN.md` in this folder (13 tasks across 5 waves)
+- [ ] Execute Wave 1 (foundation docs)
+- [ ] Execute Waves 2–4 (CI, runbook, scaffolding)
+- [ ] Execute Wave 5 (verification + learnings)
+- [ ] Per-app rollout to `concurrentoolVO` (separate follow-up project)
 
 ## Next step
 
-Plan-phase: translate the 9 requirements + 7 locked decisions into a
-wave-organized task list. Output: `PLAN.md` in this folder.
+Review `PLAN.md`. If approved, execute Wave 1 in parallel:
+T1.1 (`code_context/otap.md`), T1.2 (ADR), T1.3 (`AGENTS.md` update).
