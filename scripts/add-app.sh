@@ -47,9 +47,55 @@ _If this app's stack differs from the workspace default, document it here._
 
 -
 
+## OTAP framework
+
+This app inherits the App-Dev OS OTAP framework. See:
+- [\`../../code_context/otap.md\`](../../code_context/otap.md) — operational reference (daily workflow, branch prefixes, gates, env-vars)
+- [\`../../ADR/0005-otap-framework.md\`](../../ADR/0005-otap-framework.md) — architecture decision and rationale
+- [\`../../code_context/runbook.md\`](../../code_context/runbook.md) — migration sync, rollback procedure, branch protection setup
+
+**Per-app OTAP setup checklist** (manual, one-time):
+- [ ] Create local Supabase project named \`${APP_SLUG}-dev\`
+- [ ] Create production Supabase project named \`${APP_SLUG}-prod\`
+- [ ] Copy local Supabase URL + anon key into \`.env.local\` (template at \`.env.local.example\`)
+- [ ] Add production Supabase URL + anon key to Vercel project under "Production" environment
+- [ ] Add local Supabase URL + anon key to Vercel project under "Preview" environment
+- [ ] Add an entry to root \`.github/workflows/ci.yml\` (\`detect-changes.filters\` and a parallel build job)
+- [ ] Configure GitHub branch protection on \`main\` (one-time, repo-level — see runbook)
+
 ## Notes
 
 -
+EOF
+}
+
+create_app_env_local_example() {
+  local target="$1"
+  local app_slug="$2"
+  cat > "$target" <<EOF
+# Local environment variables for ${app_slug}
+# Copy this file to .env.local (gitignored) and fill in dev-Supabase credentials.
+#
+# OTAP framework env-var pattern (single name, scoped values per Vercel environment):
+#   - Local development reads from .env.local (this file's real version).
+#   - Vercel "Preview" environment uses the same dev-Supabase values.
+#   - Vercel "Production" environment uses prod-Supabase values (set in Vercel dashboard).
+#
+# DO NOT use _PROD/_DEV suffix variants — that scatters truth across multiple variables.
+# See code_context/otap.md § "Environment variables" for the full pattern.
+
+# --- Supabase (dev project: ${app_slug}-dev) ---
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+
+# --- Anthropic (Claude API) ---
+# If this app uses Claude API directly, add the key here.
+# Production keys go into Vercel "Production" environment, not here.
+VITE_ANTHROPIC_API_KEY=
+
+# --- Sentry (optional, error tracking) ---
+# Same DSN can be used across environments — Sentry tags by Vercel env automatically.
+SENTRY_DSN=
 EOF
 }
 
@@ -263,6 +309,9 @@ echo "  Created app AGENTS.md"
 
 create_app_claude_wrapper "${APP_DIR}/CLAUDE.md"
 echo "  Created app CLAUDE.md wrapper"
+
+create_app_env_local_example "${APP_DIR}/.env.local.example" "${APP_SLUG}"
+echo "  Created .env.local.example (OTAP two-Supabase template)"
 
 # Seed learnings from root
 if [[ -f "${PROJECT_DIR}/context/learnings.md" ]]; then
