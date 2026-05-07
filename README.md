@@ -134,6 +134,25 @@ Pre-commit hooks add behavioural guards on top:
 
 ---
 
+## OTAP framework
+
+Every app inherits a four-stage discipline (Ontwikkeling, Test, Acceptatie, Productie) so production-first work becomes structurally hard and lokaal-eerst becomes the path of least resistance.
+
+| Letter | Stage | Tooling |
+|---|---|---|
+| **O** | Ontwikkeling | `npm run dev` on a `feature/*` branch |
+| **T** | Test | local `npm run build` + Vitest, plus GitHub Actions CI on PR |
+| **A** | Acceptatie | Vercel preview deployment per PR (auto, free) |
+| **P** | Productie | `main` branch → Vercel production + production Supabase |
+
+Each app uses **two Supabase projects** (`<slug>-dev` for Local + Preview, `<slug>-prod` for Production), a single shared CI workflow with path-filters per app, and a manual `supabase db push` for production migrations.
+
+- Operational reference: [`code_context/otap.md`](code_context/otap.md)
+- Architecture decision: [`ADR/0005-otap-framework.md`](ADR/0005-otap-framework.md)
+- Migration / rollback / branch protection runbook: [`code_context/runbook.md`](code_context/runbook.md)
+
+---
+
 ## Multi-app
 
 Run multiple apps from one install:
