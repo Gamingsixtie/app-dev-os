@@ -160,16 +160,31 @@ Stack: Supabase migrations via the `supabase` CLI. No ORM, no Drizzle.
 
 ### Migration (additive)
 
+OTAP rule (Q1 from [ADR-0005](../ADR/0005-otap-framework.md)): **production migrations are always manual.** No CI step ever runs `supabase db push` against production. Reason: every PR could mutate prod schema; manual step keeps the developer conscious of schema changes hitting prod. Worth the friction.
+
 ```bash
+# 1. Create migration file
 supabase migration new <name>     # creates supabase/migrations/<timestamp>_<name>.sql
-# edit the generated SQL file
-supabase db reset                 # applies to local Docker Postgres
-# verify locally
+# 2. Edit the generated SQL file
+# 3. Apply + verify locally
+supabase db reset                 # rebuilds local DB from all migration files
+# (or to push without reset: supabase db push --project-ref <dev-ref>)
+# 4. Commit + push
 git add supabase/migrations/
 git commit -m "migration: add <name>"
-# push, open PR → dev. CI applies to dev project on merge (supabase db push).
-# dev → main PR applies to prod on merge.
+git push origin feature/<branch>
+# 5. Open PR → dev. CI verifies build+tests still pass with the migration in code.
+# 6. Merge PR → dev. Migration is now in dev branch but NOT yet applied to dev Supabase.
+# 7. Apply to dev Supabase manually (so Preview deploys see the new schema):
+supabase db push --project-ref <dev-project-ref>
+# 8. Open PR dev → main. Merge after green CI.
+# 9. Apply to prod Supabase manually:
+supabase db push --project-ref <prod-project-ref>
 ```
+
+**Why steps 7 and 9 are manual:** automated migration on merge increases blast radius — every PR could mutate prod schema without the developer being conscious of it. Friction is the feature.
+
+⚠️ **Destructive migrations** (drop column, drop table, rename) — read the next section before running step 9.
 
 ### Migration (destructive)
 
