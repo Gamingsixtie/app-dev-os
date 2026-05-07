@@ -109,6 +109,27 @@ These apply to this app without re-declaring:
 - Memory model: `git log` + `ADR/` (root + per-app) + `learnings.md` (root + per-app)
 - Promotion path: skill-learnings → conventions → ADR
 - Output standards from root: `projects/{category}-{type}/` for Level 1 deliverables
+- **OTAP framework** ([ADR-0005](../../ADR/0005-otap-framework.md)) — branching policy, two-Supabase isolation, Vercel preview-per-branch, single shared CI workflow with path filter for `apps/concurrentoolVO/**`, manual production migrations
+
+---
+
+## OTAP rollout state (per-app activation)
+
+The OTAP root-template is installed (ADR-0005, `code_context/otap.md`). Per-app activation for concurrentoolVO is partial:
+
+| Item | Status | Action owner |
+|------|--------|--------------|
+| `.env.local.example` OTAP-aware (single name, Vercel scoping note) | ✓ Done | — |
+| `apps/concurrentoolVO/**` path filter in root CI workflow | ✓ Done | — |
+| Local Supabase project (`concurrentool-dev` or current) | ✓ Exists | — |
+| Production Supabase project (`concurrentool-prod`) | ✗ Not yet | **User** — Supabase dashboard |
+| Vercel env-vars per environment scope | ✗ Not yet | **User** — Vercel dashboard |
+| Vercel deploy source flipped from upstream repo to App-Dev OS | ✗ Not yet | **User** — see [`projects/ops-vercel-flip/`](../../projects/ops-vercel-flip/) |
+| First production migration applied via `supabase db push --project-ref <prod-ref>` | ✗ Not yet | **User** — after prod project exists |
+
+Tracking project: [`projects/briefs/ops-otap-rollout-concurrentoolVO/brief.md`](../../projects/briefs/ops-otap-rollout-concurrentoolVO/brief.md).
+
+Until the manual user actions are done, the app effectively runs in pre-OTAP mode for production: deploys still come from the upstream repo and any "production" Supabase config is whatever is wired into the existing Vercel project. The framework is in place; the infra catch-up is queued.
 
 ---
 
