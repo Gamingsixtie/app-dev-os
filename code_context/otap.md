@@ -65,6 +65,31 @@ No `refactor/`, `style/`, `docs/`, scope codes. Four prefixes covers
 
 ---
 
+## Initial repo bootstrap (first-time only)
+
+> Once-per-repo problem. Skip this whole section after `main` exists on the remote.
+
+OTAP says: every change to `main` must come via PR. But to open a PR *to* `main`, that branch must exist. Creating `main` is itself a write to `main` — which the framework forbids. **Bootstrap-paradox.**
+
+Resolution: the very first creation of `main` is a manual action via the GitHub web UI. This is not a workflow step you'll ever repeat for the same repo — it happens exactly once per repo's lifetime, before OTAP applies.
+
+**Steps (one-time):**
+
+1. https://github.com/&lt;owner&gt;/&lt;repo&gt;/branches
+2. **New branch**
+3. Branch name: `main`. Source: `dev`. **Create branch.**
+
+After this, OTAP applies in full: no further direct writes to `main` are allowed; everything goes via PR `dev → main`.
+
+**Why not script this:**
+- A script using `git push origin dev:main` is itself a direct write to main — same regel-overtreding the framework forbids
+- A script using the GitHub API to create the ref ducks the rule on a technicality but in spirit still bootstraps main without a PR — and once OTAP is in place, it should be impossible for any tool (including this one) to write to main without a PR
+- A manual UI action is the cleanest exit: a *one-time* human decision is fine; it's the *recurring* automated path that OTAP wants to lock down
+
+**If `main` ever gets deleted** (extremely unusual — branch protection prevents it normally): re-bootstrap via the same UI steps. This is a true incident and warrants a learnings entry.
+
+---
+
 ## Per-app setup checklist (one-time)
 
 Run once per app when adding it to App-Dev OS. The first three are manual
