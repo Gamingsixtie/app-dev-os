@@ -98,6 +98,8 @@ When the user asks to add an app:
 
 **`dev` is the working branch.** Feature branches merge back to `dev`, then `dev` is promoted to `main` via PR.
 
+**OTAP framework** — branching here implements the OTAP discipline (Ontwikkeling, Test, Acceptatie, Productie) for App-Dev OS. `feature/*` branches are **O**ntwikkeling, local + CI checks are **T**est, Vercel preview deployments per PR are **A**cceptatie, `main` is **P**roductie. Four branch prefixes only: `feature/`, `fix/`, `chore/`, `hotfix/`. See [`code_context/otap.md`](code_context/otap.md) for the operational reference and [ADR-0005](ADR/0005-otap-framework.md) for the rationale.
+
 ### Before Major Deliverables
 
 - Load the relevant `code_context/` and (if UI-copy involved) `brand_context/` files per the Context Matrix below
