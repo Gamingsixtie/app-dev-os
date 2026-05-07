@@ -49,16 +49,25 @@ Apply the same rule to `dev` if you want CI to gate merges into `dev` as well (r
 
 ## Environments
 
-| Env | URL | Database | Branch | Auto-deploy |
-|---|---|---|---|---|
-| Local | `http://localhost:3000` | Supabase dev project (remote) | any | — |
-| Preview | `{app-slug}-{branch}.vercel.app` | Supabase dev project (remote) | `feature/*` | yes, on push |
-| Production | `{your-domain}.com` | Supabase prod project | `main` | yes, via PR merge `dev` → `main` |
+OTAP letter mapping per environment — see [`otap.md`](otap.md) and [ADR-0005](../ADR/0005-otap-framework.md) for the full framework rationale.
+
+| OTAP | Env | URL | Database | Branch | Auto-deploy |
+|---|---|---|---|---|---|
+| **O** | Local | `http://localhost:3000` | Supabase **dev** project (remote) — env-vars from `.env.local` | `feature/*` | — |
+| **T** | Local + CI | (no URL — runs in terminal + GitHub Actions) | Same as Local | `feature/*` (on PR) | — |
+| **A** | Preview | `{app-slug}-{branch}.vercel.app` | Supabase **dev** project — env-vars from Vercel "Preview" environment | `feature/*` | yes, on push |
+| **P** | Production | `{your-domain}.com` | Supabase **prod** project — env-vars from Vercel "Production" environment | `main` | yes, via PR merge `dev` → `main` |
 
 > Template shape only — per-app URLs filled in under `apps/{slug}/code_context/runbook.md`.
 
-**Local + Preview share one Supabase dev project.** Solo-dev simplification: no parallel developers means no schema-conflicts to worry about. Triggers to split Local off into its own Supabase (via `supabase start` Docker stack):
+**Two Supabase projects per app — never one.** Each app has a `<slug>-dev` Supabase project (used by Local + Preview) and a `<slug>-prod` Supabase project (used by Production only). Same env-var names (e.g. `VITE_SUPABASE_URL`) — different values per Vercel environment scope. This is what makes OTAP actually safe: a local migration cannot reach production by accident because the connection strings differ.
 
+**Why Local + Preview share the dev Supabase (and not a Docker-local one):**
+- Solo dev — no parallel developers means no schema-conflicts on the shared dev DB
+- Avoids Docker overhead for local development
+- Preview deploys behave identically to Local (same DB, same data)
+
+Triggers to split Local off into its own Supabase (via `supabase start` Docker stack):
 - Second developer joins the project
 - Local seed data keeps getting clobbered by migrations on the shared dev DB
 - You want to test a schema change without affecting any preview deploy
