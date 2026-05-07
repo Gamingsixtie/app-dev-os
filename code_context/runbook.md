@@ -102,31 +102,65 @@ No manual `git tag` step. Vercel tracks each deploy with its own immutable ID. A
 - Push to a `feature/*` branch → Vercel posts the preview URL in PR comments automatically.
 - One preview deploy per branch; updates on every push.
 
-## Rollback
+## Production incident rollback
 
-Two paths. Use the fast one to stop bleeding, then the source-sync one to keep git and production aligned.
+Five-step procedure (Q4 from [ADR-0005](../ADR/0005-otap-framework.md)). Do them in order. The first stops bleeding; the rest keep git, schema, monitoring, and learnings aligned with reality. Skipping later steps means production "looks fine" but state-drift causes the same incident again next deploy.
 
-### 1. Fast rollback (~30 sec, no git)
+### Step 1 — Fast rollback (~30 sec, no git, no schema)
 
-Vercel dashboard → **Deployments** → pick the last good deploy → **Promote to Production**. Production restores to that earlier build immediately. Git is still at the broken state — fixed in step 2.
+Vercel dashboard → **Deployments** → pick the last good deploy → **Promote to Production**. Production restores to that earlier build immediately.
 
-Use when: production is broken and seconds matter.
+Use when: production is broken and seconds matter. Resolves ~80% of incidents (any code-only regression).
 
-### 2. Source-sync rollback (~5 min, within 24 h of step 1)
+### Step 2 — Migration revert (only if a migration ran)
 
-Bring git in line with what is actually live:
+If the broken deploy applied a Supabase migration (you ran `supabase db push --project-ref <prod-ref>` recently), the schema is now out of sync with the rolled-back code.
+
+```bash
+# Create a revert migration locally
+supabase migration new revert-<original-migration-name>
+# Edit the SQL — write the inverse of the original (DROP TABLE if it added one, etc.)
+supabase db reset                              # verify locally
+git add supabase/migrations/
+git commit -m "migration: revert <name>"
+# Apply to dev Supabase first
+supabase db push --project-ref <dev-ref>
+# Then apply to prod Supabase
+supabase db push --project-ref <prod-ref>
+```
+
+Skip this step only if the bad deploy contained no schema changes.
+
+### Step 3 — Source-sync rollback (~5 min, within 24 h of step 1)
+
+Bring git in line with what is now live. Without this, the broken commit is still on `main` — and the next deploy will re-deploy it.
 
 ```bash
 git checkout dev
 git checkout -b revert/<short-name>
-git revert -m 1 <merge-sha-on-main>   # the merge that broke prod
+git revert -m 1 <merge-sha-on-main>             # the merge that broke prod
 git push origin revert/<short-name>
 gh pr create --base dev --title "revert: <short-name>"
 ```
 
 Merge the revert PR into `dev`, then open a follow-up `dev → main` PR. Once that lands, git and the deployed Vercel build match again.
 
-Skipping step 2 means git drifts from production — two deploys later someone re-promotes the broken build by accident.
+### Step 4 — Log the incident in Sentry + learnings
+
+- **Sentry:** add a tag/note to the captured error with the bad-deploy ID and the rollback deploy ID. Helps future-you correlate the incident with the fix.
+- **Learnings:** open `context/learnings.md` § Per Phase, add a one-paragraph entry with: what broke, root cause (one sentence), the prevention rule (one sentence). Keep it short; this is for future-you, not a corporate post-mortem.
+
+### Step 5 — Communicate (only if external users impacted)
+
+- **In-app banner / status page** if downtime exceeded ~2 minutes
+- **Transactional email** if user data was affected (no data loss, no email needed)
+- Skip entirely if rollback was fast enough that no user noticed
+
+This step is judgment-only — no automation, no template. Trust your read of the impact.
+
+---
+
+**Rule of thumb:** fast rollback (step 1) is reflexive — do it before reading more of this runbook. Steps 2-5 follow within the same hour. Step 4 (learnings) is the one that's easiest to skip and most valuable to keep — every skipped learnings entry costs you the same lesson again later.
 
 ## Secrets
 
