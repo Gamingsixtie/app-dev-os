@@ -18,6 +18,35 @@ To bypass for an emergency commit (use sparingly): `git commit --no-verify`.
 
 This is the strict gate — the Claude-side `typecheck-guard.js` hook stays advisory (no per-edit friction).
 
+## GitHub branch protection setup (one-time per repo)
+
+> Required step to make the OTAP framework actually enforce the merge gate. Without this, CI runs but PRs can still be merged with red checks. Cannot be scripted on free-tier accounts — apply once via the GitHub web UI.
+
+Open the App-Dev OS repository on GitHub → **Settings** → **Branches** → **Add branch protection rule**.
+
+Apply this rule to `main`:
+
+| Setting | Value | Why |
+|---|---|---|
+| Branch name pattern | `main` | The production branch — the one we're protecting |
+| Require a pull request before merging | ✓ Enabled | Forces every change through a PR (you cannot merge a direct commit) |
+| → Require approvals | 0 (or 1 if a reviewer is set up) | Solo dev: 0 is fine. Set to 1 once a reviewer is added |
+| Require status checks to pass before merging | ✓ Enabled | The actual gate |
+| → Require branches to be up to date before merging | ✓ Enabled | Forces rebase against latest `main` before merge — catches conflicts early |
+| → Status checks required | `CI` | This is the `ci-success` summary job from `.github/workflows/ci.yml`. Add it after the workflow has run at least once so GitHub knows the check name |
+| Require conversation resolution before merging | ✓ Enabled (optional) | All PR comments must be resolved before merge |
+| Require linear history | ✓ Enabled (recommended) | Prevents merge commits — keeps `main` history clean |
+| Do not allow bypassing the above settings | ✓ Enabled | Owner cannot push directly to `main`, even by accident |
+| Restrict who can push to matching branches | ✓ Enabled, empty list | Nobody can push directly — only PR merges |
+
+Apply the same rule to `dev` if you want CI to gate merges into `dev` as well (recommended — keeps `dev` always-green).
+
+**Verification:** open a test PR with a deliberate type error in any app under `apps/`. The PR page should show the `CI` check as red and the **Merge** button as disabled. Close the PR without merging once verified.
+
+**If you ever need to bypass (true emergency):** temporarily disable the rule, merge, re-enable. This action is logged in the repo audit log — visible to other contributors. Use only for actual production incidents where the deploy must land in seconds, not minutes.
+
+---
+
 ## Environments
 
 | Env | URL | Database | Branch | Auto-deploy |
