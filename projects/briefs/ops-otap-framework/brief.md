@@ -56,12 +56,21 @@ shared `code_context/`, `AGENTS.md`, root `.github/workflows/`,
 - [x] Exploration done — decisions locked in [.planning/notes/otap-framework-decisions.md](../../.planning/notes/otap-framework-decisions.md)
 - [x] Spec locked — see `SPEC.md` in this folder (9 requirements + 7 decisions confirmed 2026-05-07)
 - [x] Plan drafted — see `PLAN.md` in this folder (13 tasks across 5 waves)
-- [ ] Execute Wave 1 (foundation docs)
-- [ ] Execute Waves 2–4 (CI, runbook, scaffolding)
-- [ ] Execute Wave 5 (verification + learnings)
+- [x] Execute Wave 1 (foundation docs) — ADR-0005, otap.md, AGENTS.md
+- [x] Execute Wave 2 (CI workflow + branch protection runbook section)
+- [x] Execute Wave 3 (runbook updates: environments, migrations, rollback)
+- [x] Execute Wave 4 (add-app.sh OTAP-aware, README.md updated)
+- [x] Execute Wave 5 partial (T5.1 smoke test + T5.4 learnings) — T5.2/T5.3 deferred (require GitHub remote + branch protection set up)
 - [ ] Per-app rollout to `concurrentoolVO` (separate follow-up project)
+- [ ] Out-of-band manual actions per app (Supabase prod project, branch protection, Vercel env-vars) — see PLAN.md
 
-## Next step
+## Status
 
-Review `PLAN.md`. If approved, execute Wave 1 in parallel:
-T1.1 (`code_context/otap.md`), T1.2 (ADR), T1.3 (`AGENTS.md` update).
+**Root-template work: complete.** OTAP framework is installed at template
+level. Future apps added via `add-app.sh` inherit the framework structurally.
+
+**Pending for full activation:**
+- App-Dev OS repo needs to live on GitHub for branch protection + CI to actually
+  run (currently no remote configured)
+- For each app: manual Supabase project creation + Vercel env-var setup
+- Per-app rollout work tracked separately

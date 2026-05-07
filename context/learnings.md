@@ -100,7 +100,44 @@ Format per phase:
 - ADR-XXXX: {title}
 ```
 
-_(no phases closed yet)_
+## Phase OTAP-1 — ops-otap-framework foundations (closed 2026-05-07)
+
+Level 3 GSD project under [`projects/briefs/ops-otap-framework/`](../projects/briefs/ops-otap-framework/). Installed OTAP discipline as App-Dev OS root-template — every app added via `add-app.sh` now inherits environment isolation, CI gates, and rollback procedure.
+
+### Decisions
+
+- OTAP applies at root-template level, not per-app. Single source of truth, new apps inherit by default. (See ADR-0005)
+- Each app uses **two Supabase projects** (`<slug>-dev` + `<slug>-prod`); local + preview share the dev project.
+- Acceptatie = Vercel preview-per-branch. No standing acceptance environment — rejected as ceremony for solo dev.
+- Production migrations are **manual** (`supabase db push --project-ref <prod-ref>` after merge). Friction is the feature.
+- Single env-var name pattern (`VITE_SUPABASE_URL`), values vary per Vercel environment scope. No `_PROD`/`_DEV` suffixes.
+- Single shared CI workflow with path filters per app. New apps add an entry to `detect-changes.filters` + a parallel build job.
+- Pre-commit hook (typecheck-only) is friction-reducer; GitHub Actions CI is the authoritative gate.
+
+### Lessons
+
+- **Existing runbook content collided with new framework.** The pre-OTAP `runbook.md` already had Migration + Rollback sections, but their content (auto-CI migration apply; 2-step rollback) contradicted the locked OTAP decisions. Saved time vs. expected (sections existed) but cost time on the conflict-detection step. Future framework rollouts: scan target docs for prior content *before* writing the SPEC, not during execution.
+- **Smoke-testing scaffold scripts in a scratch dir caught zero bugs but earned full confidence.** `bash -n` only validates syntax — it doesn't catch substitution errors. The `bash add-app.sh "OTAP Smoke Test"` run in scratch-dir-then-rm proved the slug substitution path actually works. Repeat this pattern for any future scaffold-script change.
+- **Out-of-band manual actions belong in PLAN.md, not as separate todos.** PLAN.md's "Out-of-band manual user actions" section keeps Supabase project creation, GitHub branch protection, and Vercel env-var config visible alongside the executable plan instead of getting lost in a separate todo file. Pattern: any GSD plan with infra setup needs this section.
+
+### Patterns
+
+- **Level 3 sub-project structure**: `projects/briefs/<slug>/{brief.md, SPEC.md, PLAN.md}` lives parallel to the root `.planning/` for an active milestone. SPEC + PLAN here, no separate `.planning/` until complexity demands it (skipped for OTAP because 13 tasks didn't need their own STATE/ROADMAP).
+- **🟡 PROPOSED → ✓ Locked workflow** for SPEC-with-implementation-decisions: write the SPEC with explicit "Proposed" markers on undecided items, get user batch-confirmation, edit markers to "Locked" in a separate commit. Keeps the spec phase tight without cramming all decisions into the exploration session.
+- **CI summary job pattern** for branch protection compatibility: a `ci-success` job that depends on all conditional jobs and uses `if: always()` + `contains(needs.*.result, 'failure')` is the right shape — single required check on `main` branch protection, conditional jobs free to skip per path filter.
+
+### Surprises
+
+- **`code_context/runbook.md` was already 60% OTAP-aligned.** Pre-existing content covered preview deploys, Supabase migrations, fast Vercel rollback, and the `dev` → `main` PR flow. Wave 3 turned out to be more "fix two outdated paragraphs" than "write three new sections." This was a gift, not a problem — the prior author (past-Pim during `/tailor-os`) was already moving in the OTAP direction.
+- **`branch-guard.js` already enforced the hardest part of OTAP** (no direct push to `main`). The framework formalized what was already structurally true rather than adding the structure from scratch. Most OTAP discipline was 1 ADR + 1 ops-doc away from existing.
+
+### Linked ADRs
+
+- [ADR-0005](../ADR/0005-otap-framework.md) — OTAP framework as App-Dev OS root-template
+
+---
+
+_(no other phases closed yet)_
 
 ---
 
