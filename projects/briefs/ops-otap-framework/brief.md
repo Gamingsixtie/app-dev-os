@@ -3,7 +3,7 @@ title: OTAP Framework — Root-Template Rollout
 slug: ops-otap-framework
 level: 3
 created: 2026-05-07
-status: spec-pending-review
+status: spec-locked
 related:
   - .planning/notes/otap-framework-decisions.md
   - .planning/todos/pending/spec-otap-framework.md
@@ -54,12 +54,12 @@ shared `code_context/`, `AGENTS.md`, root `.github/workflows/`,
 ## Status
 
 - [x] Exploration done — decisions locked in [.planning/notes/otap-framework-decisions.md](../../.planning/notes/otap-framework-decisions.md)
-- [ ] **Spec drafted — awaiting user review** (see `SPEC.md` in this folder)
+- [x] Spec locked — see `SPEC.md` in this folder (9 requirements + 7 decisions confirmed 2026-05-07)
 - [ ] Plan phase
 - [ ] Execute phase
 - [ ] ADR + rollout to first app
 
 ## Next step
 
-Review `SPEC.md` in this folder. Confirm or adjust the 7 proposed answers
-to the open questions, then proceed to plan-phase.
+Plan-phase: translate the 9 requirements + 7 locked decisions into a
+wave-organized task list. Output: `PLAN.md` in this folder.

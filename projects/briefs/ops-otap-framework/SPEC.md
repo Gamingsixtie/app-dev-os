@@ -1,13 +1,10 @@
 # Phase 1: OTAP Framework Foundations — Specification
 
 **Created:** 2026-05-07
-**Status:** Draft — pending user review of proposed decisions
+**Status:** Locked — all decisions confirmed by user 2026-05-07
 **Project:** ops-otap-framework (Level 3)
 **Requirements:** 9 locked
-
-> ⚠️ **Review marker:** Sections marked `🟡 PROPOSED` contain decisions
-> that resolve open questions from the exploration. They are *suggestions*
-> until the user confirms — see "Proposed Decisions" section at the bottom.
+**Decisions:** 7 locked (Q1–Q7 below)
 
 ---
 
@@ -123,11 +120,10 @@ rollback) is absent. This phase installs the plumbing.
 
 ---
 
-## 🟡 PROPOSED Decisions (open questions resolved — awaiting user confirmation)
+## Locked Decisions (Q1–Q7)
 
 These resolve the 7 open questions from `.planning/notes/otap-framework-decisions.md`.
-Each is a *recommendation*, not yet locked. User can accept all, accept some,
-or override per item.
+All confirmed by user on 2026-05-07. Treated as locked input by plan-phase.
 
 ### Q1 — Database migration sync workflow
 
@@ -212,19 +208,15 @@ Rejected: `refactor/`, `style/`, `docs/`, scope prefixes like `concurrentoolVO/f
 
 ---
 
-## Ambiguity Report (after user reviews proposed decisions)
+## Ambiguity Report
 
-| Dimension          | Pre-review | Post-review (target) | Min  |
-|--------------------|------------|----------------------|------|
-| Goal Clarity       | 0.85       | 0.85                 | 0.75 |
-| Boundary Clarity   | 0.85       | 0.85                 | 0.70 |
-| Constraint Clarity | 0.65       | 0.80                 | 0.65 |
-| Acceptance Criteria| 0.80       | 0.80                 | 0.70 |
-| **Ambiguity**      | 0.20       | 0.16                 | ≤0.20|
-
-Constraint Clarity is currently at the minimum because the 7 proposed
-decisions are not yet locked. Once user confirms (or amends), Constraint
-Clarity rises and the SPEC is ready for plan-phase.
+| Dimension          | Score | Min  | Status | Notes                                  |
+|--------------------|-------|------|--------|----------------------------------------|
+| Goal Clarity       | 0.85  | 0.75 | ✓      | Goal sentence is concrete + measurable |
+| Boundary Clarity   | 0.85  | 0.70 | ✓      | Explicit out-of-scope list with reasons|
+| Constraint Clarity | 0.80  | 0.65 | ✓      | All 7 decisions locked                 |
+| Acceptance Criteria| 0.80  | 0.70 | ✓      | 8 pass/fail checkboxes                 |
+| **Ambiguity**      | 0.16  | ≤0.20| ✓      | SPEC ready for plan-phase              |
 
 ## Interview Log
 
@@ -234,16 +226,16 @@ Clarity rises and the SPEC is ready for plan-phase.
 | Exploration| Scope: per-app or root-template?              | Root-template (b)                            |
 | Exploration| Acceptance environment shape?                  | Vercel preview per branch (a-light)          |
 | Exploration| Database isolation?                            | Two separate Supabase projects per app       |
-| Spec       | Migrations workflow?                           | 🟡 PROPOSED — Q1 above                       |
-| Spec       | Env vars naming?                               | 🟡 PROPOSED — Q2 above                       |
-| Spec       | PR gates?                                      | 🟡 PROPOSED — Q3 above                       |
-| Spec       | Rollback shape?                                | 🟡 PROPOSED — Q4 above                       |
-| Spec       | Branch naming?                                 | 🟡 PROPOSED — Q5 above                       |
-| Spec       | CI vs local gate split?                        | 🟡 PROPOSED — Q6 above                       |
-| Spec       | CI workflow per-app or shared?                 | 🟡 PROPOSED — Q7 above                       |
+| Spec       | Migrations workflow?                           | ✓ Locked — Q1 above                       |
+| Spec       | Env vars naming?                               | ✓ Locked — Q2 above                       |
+| Spec       | PR gates?                                      | ✓ Locked — Q3 above                       |
+| Spec       | Rollback shape?                                | ✓ Locked — Q4 above                       |
+| Spec       | Branch naming?                                 | ✓ Locked — Q5 above                       |
+| Spec       | CI vs local gate split?                        | ✓ Locked — Q6 above                       |
+| Spec       | CI workflow per-app or shared?                 | ✓ Locked — Q7 above                       |
 
 ---
 
 *Project: ops-otap-framework (Level 3)*
-*Spec drafted: 2026-05-07*
-*Next step: user reviews 7 proposed decisions → finalize SPEC.md → /gsd-plan-phase or manual plan*
+*Spec locked: 2026-05-07*
+*Next step: plan-phase — translate 9 requirements + 7 decisions into ordered task list*
