@@ -89,6 +89,7 @@ _Auto-maintained by code-feature-build, code-refactor, and other architecture-to
 | [ADR-0002](./0002-biome-over-eslint-prettier.md) | Use Biome over ESLint + Prettier | Accepted | 2026-04-28 |
 | [ADR-0003](./0003-no-mandatory-services-layer.md) | No mandatory services layer | Accepted | 2026-04-28 |
 | [ADR-0004](./0004-sentry-and-vercel-logs-defer-analytics.md) | Sentry for errors + Vercel built-in logs; defer product analytics | Accepted | 2026-04-28 |
+| [ADR-0005](./0005-otap-framework.md) | OTAP framework as App-Dev OS root-template | Accepted | 2026-05-07 |
 
 ## Promotion path
 
