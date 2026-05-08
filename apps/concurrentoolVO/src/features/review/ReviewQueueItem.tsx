@@ -4,18 +4,13 @@ import { approveProposal, rejectProposal, fetchAuditLog } from '@/db/pricing-ope
 import { usePricingDataStore } from '@/stores/pricing-data-store';
 import { ProposalBadge } from '@/components/ui/ProposalBadge';
 import { PriceDiffDisplay } from '@/components/ui/PriceDiffDisplay';
+import { PROVIDER_LABELS } from '@/engine/price-comparison';
+import type { ProviderKey } from '@/engine/price-comparison';
 import type { PriceProposal } from '@/db/pricing-types';
 
 interface ReviewQueueItemProps {
   proposal: PriceProposal;
 }
-
-const PROVIDER_LABELS: Record<string, string> = {
-  cito: 'Cito',
-  dia: 'DIA',
-  jij: 'JIJ',
-  saqi: 'SAQI',
-};
 
 export default function ReviewQueueItem({ proposal }: ReviewQueueItemProps) {
   const [expanded, setExpanded] = useState(false);
@@ -64,7 +59,7 @@ export default function ReviewQueueItem({ proposal }: ReviewQueueItemProps) {
     }
   }, [rejectionReason, rejectMutation]);
 
-  const providerLabel = PROVIDER_LABELS[proposal.provider] ?? proposal.provider;
+  const providerLabel = PROVIDER_LABELS[proposal.provider as ProviderKey] ?? proposal.provider;
 
   return (
     <div
