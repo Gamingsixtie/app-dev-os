@@ -13,7 +13,7 @@
       "args": [
         "-y",
         "@supabase/mcp-server-supabase@latest",
-        "--project-ref=xxpvreojihjtgiwrqbqn"
+        "--project-ref=mhmivlzevnzbimhkniqu"
       ],
       "env": {
         "SUPABASE_ACCESS_TOKEN": "REPLACE_WITH_YOUR_SUPABASE_PAT"

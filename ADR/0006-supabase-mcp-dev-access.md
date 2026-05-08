@@ -22,9 +22,11 @@ State at decision time:
   intentional to prevent secret leakage via the agent's context
 - `curl`/`wget` are hard-denied at the Bash level — the agent cannot
   make raw HTTP calls
-- Two Supabase projects exist per OTAP: `concurrentool-dev`
-  (`xxpvreojihjtgiwrqbqn`) and `concurrentool-prod`
-  (`upbucffkzvzzflvyzpld`)
+- Two Supabase projects exist per OTAP: `Rekentool-development`
+  (`mhmivlzevnzbimhkniqu`) and `concurrentool-prod`
+  (`upbucffkzvzzflvyzpld`). An earlier dev project
+  (`xxpvreojihjtgiwrqbqn`, named `concurrentool-dev`) was superseded
+  on 2026-05-08 and may be archived.
 - The Supabase CLI is referenced in the project but not installed
   on the developer's machine
 
@@ -45,7 +47,7 @@ Concrete configuration:
 | Aspect | Choice |
 |--------|--------|
 | MCP server | `@supabase/mcp-server-supabase` (official, Supabase-published) |
-| Scope | `--project-ref=xxpvreojihjtgiwrqbqn` (dev only) |
+| Scope | `--project-ref=mhmivlzevnzbimhkniqu` (dev only) |
 | Permissions | Read-write (no `--read-only` flag) |
 | Credential type | Personal Access Token (PAT) from the developer's Supabase account |
 | Credential storage | Plain string in `.mcp.json` — file is in `.gitignore`. A committable template `.mcp.example.json` documents the structure without credentials |
