@@ -1,5 +1,6 @@
 import type { ProviderPriceCalculator, ModulePriceResult } from './types';
 import type { JijProviderConfig, JijLicenseTier } from '@/data/providers/jij';
+import { buildOverrideResult } from './shared';
 
 /**
  * JIJ! calculator: tiered-license pricing varying with school size.
@@ -68,19 +69,8 @@ export class JijCalculator implements ProviderPriceCalculator {
       return null;
     }
 
-    // Override takes precedence
     if (overridePrice !== undefined) {
-      return {
-        pricePerStudent: overridePrice,
-        totalCost: overridePrice * totalStudents,
-        breakdown: [
-          {
-            label: `Schoolspecifieke prijs (overschrijving): EUR ${overridePrice.toFixed(2)}/lln`,
-            amount: overridePrice * totalStudents,
-          },
-        ],
-        isPackagePrice: false,
-      };
+      return buildOverrideResult(overridePrice, totalStudents);
     }
 
     // Modules included in the license at no extra cost (amountPerStudent === 0)

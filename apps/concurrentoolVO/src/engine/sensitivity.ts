@@ -1,5 +1,5 @@
-import type { ComparisonResult } from './price-comparison';
-import type { ProviderKey } from './price-comparison';
+import { PROVIDER_LABELS } from './price-comparison';
+import type { ComparisonResult, ProviderKey } from './price-comparison';
 
 export interface SensitivityScenario {
   discountPercent: number;
@@ -28,13 +28,6 @@ export interface SensitivityResult {
     }>;
   };
 }
-
-const PROVIDER_LABELS: Record<ProviderKey, string> = {
-  cito: 'Cito',
-  dia: 'DIA',
-  jij: 'JIJ',
-  saqi: 'SAQI',
-};
 
 /**
  * Calculate the break-even discount percentage at which the competitor

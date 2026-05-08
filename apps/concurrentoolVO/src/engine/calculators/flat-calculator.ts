@@ -1,5 +1,6 @@
 import type { ProviderPriceCalculator, ModulePriceResult } from './types';
 import type { SaqiProviderConfig } from '@/data/providers/saqi';
+import { buildOverrideResult } from './shared';
 
 /**
  * Generic flat pricing calculator for providers with simple per-student pricing.
@@ -19,19 +20,8 @@ export class FlatCalculator implements ProviderPriceCalculator {
     totalStudents: number,
     overridePrice?: number,
   ): ModulePriceResult | null {
-    // Override takes precedence
     if (overridePrice !== undefined) {
-      return {
-        pricePerStudent: overridePrice,
-        totalCost: overridePrice * totalStudents,
-        breakdown: [
-          {
-            label: `Schoolspecifieke prijs (overschrijving): EUR ${overridePrice.toFixed(2)}/lln`,
-            amount: overridePrice * totalStudents,
-          },
-        ],
-        isPackagePrice: false,
-      };
+      return buildOverrideResult(overridePrice, totalStudents);
     }
 
     // Look up module in defaultPrices

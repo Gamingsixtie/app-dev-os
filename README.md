@@ -153,6 +153,20 @@ Each app uses **two Supabase projects** (`<slug>-dev` for Local + Preview, `<slu
 
 ---
 
+## Connected tools (MCP servers)
+
+Claude can be given direct, scoped access to external systems via MCP servers configured in `.mcp.json` (gitignored). Each entry below documents what it does, what scope it has, and how to revoke.
+
+| Server | What it enables | Scope | Credential | Revoke |
+|---|---|---|---|---|
+| `supabase-dev` | Read-write SQL queries, schema inspection, RLS introspection, storage and auth admin on the **dev** Supabase project (`xxpvreoji…`) | Locked to dev project-ref via `--project-ref` flag — production is structurally unreachable | Personal Access Token (PAT) in `.mcp.json` | https://supabase.com/dashboard/account/tokens → "Revoke" on the PAT |
+
+Setup per machine: generate a PAT, copy `.mcp.example.json` to `.mcp.json` (gitignored), replace the placeholder with the PAT, restart Claude Code. Audit-trail: every MCP call appears in the agent's tool-call log in the Claude Code UI.
+
+Architecture decision: [`ADR/0006-supabase-mcp-dev-access.md`](ADR/0006-supabase-mcp-dev-access.md).
+
+---
+
 ## Multi-app
 
 Run multiple apps from one install:
