@@ -1,15 +1,13 @@
 #!/usr/bin/env node
 // Branch Guard — PreToolUse hook
-// Zone-based branch protection: nudges users toward the right branch
-// for the type of files they're changing.
+// Single-branch workflow (per ADR-0007 superseding ADR-0005's branching model):
+//   - feature/<slug> branches are the working space
+//   - main is the deploy branch (Vercel auto-deploys on push)
+//   - merge is direct (squash), no PR ceremony, no CI gate
 //
-// Zones:
-//   Content (projects/, brand_context/, context/, cron/jobs/, clients/) — commit freely to dev
-//   Config  (SKILL.md, AGENTS.md, CLAUDE.md, .env.example, scripts/) — advisory: use feature branch
-//   Code    (command-centre/src/, .claude/hooks/, runtime JS/TS) — strong nudge: use feature branch
-//
-// On main: always warns (GitHub branch protection is the hard gate).
-// On feature/* or worktree-*: always allows.
+// This hook is now ADVISORY only — it never blocks. It prints a warning when
+// the user is about to write/commit/push directly on main, so accidental
+// edits on the wrong branch are visible but not stopped.
 
 const { execSync } = require('child_process');
 
@@ -124,45 +122,30 @@ process.stdin.on('end', () => {
       process.exit(0);
     }
 
-    // BLOCK on main/master, advisory on dev
+    // Advisory warning on main/master/production — never block.
+    // Per ADR-0007: single-branch workflow allows direct work on main, but the
+    // user explicitly opted in to a manual pre-merge test discipline. Surface a
+    // reminder without stopping the action.
     if (branch === 'main' || branch === 'master' || branch === 'production') {
-      process.stderr.write(
-        `[branch-guard] BLOCKED: writes/commits/pushes on protected branch '${branch}' are not allowed.\n` +
-        `Switch to a feature branch first:\n` +
-        `  git checkout -b feature/<name>     # new feature\n` +
-        `  git checkout dev                    # working branch\n` +
-        `Or use \`/new-feature\` to start a feature flow.`
-      );
-      process.exit(2);
-    }
+      const message =
+        `[branch-guard] You are working directly on '${branch}'. ` +
+        `Per ADR-0007 this is allowed, but the manual pre-merge test ritual ` +
+        `(npm run build + npx vitest run on the source feature branch) is your ` +
+        `responsibility — there is no CI gate. A push to main triggers a Vercel ` +
+        `production deploy.`;
 
-    // Build advisory message based on branch + zone (dev branch only)
-    let message = null;
-
-    if (branch === 'dev') {
-      if (zone === 'code') {
-        message = `This change touches code (Zone 3). Consider using \`/new-feature\` to create a feature branch ` +
-          `for code changes — it keeps dev stable and gives you a clean merge path.`;
-      } else if (zone === 'config') {
-        message = `This change touches config files (Zone 2). Consider using \`/new-feature\` for config changes ` +
-          `— especially if they affect agent behaviour or CI.`;
-      }
-      // content on dev: no message needed
-    }
-    // Other branches (not feature/*, not worktree-*, not main, not dev): no message
-
-    if (!message) {
+      const output = {
+        hookSpecificOutput: {
+          hookEventName: 'PreToolUse',
+          additionalContext: message,
+        },
+      };
+      process.stdout.write(JSON.stringify(output));
       process.exit(0);
     }
 
-    const output = {
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        additionalContext: message,
-      },
-    };
-
-    process.stdout.write(JSON.stringify(output));
+    // Other branches (feature/*, worktree-*, anything else): no message.
+    process.exit(0);
   } catch {
     // Silent fail — never block tool execution
     process.exit(0);

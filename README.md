@@ -122,11 +122,11 @@ Niet elke learning hoeft door alle stappen — alleen als 'm zwaarder wordt.
 ## Permissions & guards
 
 `.claude/settings.json` is strict by design:
-- **Denied**: `rm -rf /`, `git push origin main`, `git push --force`, `npm uninstall`, `curl/wget/ssh`, reading `.env*` / credentials / `.pem` / `.key`, editing lockfiles
-- **Allowed**: project `npm/pnpm/yarn run`, basic git read+commit, scoped writes to `src/`, `tests/`, `docs/`, `code_context/`, `brand_context/`
+- **Denied**: `rm -rf /`, `git push --force`, `npm uninstall`, reading `.env*` / credentials / `.pem` / `.key`, editing lockfiles
+- **Allowed**: project `npm/pnpm/yarn run`, basic git read+commit+push (incl. main per ADR-0007), scoped writes to `src/`, `tests/`, `docs/`, `code_context/`, `brand_context/`
 
 Pre-commit hooks add behavioural guards on top:
-- `branch-guard.js` — **blocks** writes/commits/pushes on `main`/`master`/`production`
+- `branch-guard.js` — **advisory** warning when working on `main`/`master`/`production` (per ADR-0007); does not block
 - `secret-scan.js` — **blocks** secrets in writes or bash commands
 - `dangerous-bash.js` — **blocks** high-blast-radius commands
 - `lockfile-guard.js` — **blocks** direct edits to lockfiles
@@ -134,21 +134,24 @@ Pre-commit hooks add behavioural guards on top:
 
 ---
 
-## OTAP framework
+## Workflow (single-branch, no PR, no CI)
 
-Every app inherits a four-stage discipline (Ontwikkeling, Test, Acceptatie, Productie) so production-first work becomes structurally hard and lokaal-eerst becomes the path of least resistance.
+Per [ADR-0007](ADR/0007-single-branch-no-pr-workflow.md) (supersedes the workflow parts of ADR-0005):
 
-| Letter | Stage | Tooling |
-|---|---|---|
-| **O** | Ontwikkeling | `npm run dev` on a `feature/*` branch |
-| **T** | Test | local `npm run build` + Vitest, plus GitHub Actions CI on PR |
-| **A** | Acceptatie | Vercel preview deployment per PR (auto, free) |
-| **P** | Productie | `main` branch → Vercel production + production Supabase |
+| Stage | Tooling |
+|---|---|
+| Develop | `npm run dev` on a `feature/<slug>` branch |
+| Pre-merge tests | manual: `npm run build` + `npx vitest run` (your discipline, no automation) |
+| Optional pre-prod check | push feature branch → Vercel preview URL |
+| Merge | `git checkout main && git merge --squash feature/<slug> && git commit && git push` |
+| Deploy | Vercel auto-deploys on push to main → production |
+| Rollback | Vercel dashboard → previous deploy → "Promote to Production" |
 
-Each app uses **two Supabase projects** (`<slug>-dev` for Local + Preview, `<slug>-prod` for Production), a single shared CI workflow with path-filters per app, and a manual `supabase db push` for production migrations.
+Each app still uses **two Supabase projects** (`<slug>-dev` for Local + Preview, `<slug>-prod` for Production) per ADR-0005's still-active isolation decision. Production migrations remain manual: `supabase db push --project-ref <prod-ref>`.
 
 - Operational reference: [`code_context/otap.md`](code_context/otap.md)
-- Architecture decision: [`ADR/0005-otap-framework.md`](ADR/0005-otap-framework.md)
+- Active workflow ADR: [`ADR/0007-single-branch-no-pr-workflow.md`](ADR/0007-single-branch-no-pr-workflow.md)
+- Original framework (workflow parts superseded): [`ADR/0005-otap-framework.md`](ADR/0005-otap-framework.md)
 - Migration / rollback / branch protection runbook: [`code_context/runbook.md`](code_context/runbook.md)
 
 ---

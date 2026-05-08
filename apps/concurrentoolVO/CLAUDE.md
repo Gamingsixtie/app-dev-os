@@ -71,7 +71,7 @@ Intake/Wizard → `useSchoolProfileStore` → `usePriceComparisonStore.initializ
 
 # Workflow
 
-- Commit-and-push policy: see [`AGENTS.md`](AGENTS.md) § App-specific overrides — App-Dev OS branch-guard supersedes auto-push (commit after approval is fine; push to `main` requires PR + explicit OK)
+- Commit-and-push policy: see [`AGENTS.md`](AGENTS.md) § App-specific overrides — single-branch workflow per ADR-0007 (commit after approval fine; squash-merge to main + push to main allowed but only after manual pre-merge tests pass and explicit OK)
 - IMPORTANT: Run `npm run build` voordat je klaar bent — moet slagen zonder errors
 - Bij engine-wijzigingen: run `npx vitest run` en controleer dat alle tests slagen
 - Nieuwe wizard step? Maak component + Zod schema + test — alle drie

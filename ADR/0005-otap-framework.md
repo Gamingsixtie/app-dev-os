@@ -1,9 +1,15 @@
 # ADR-0005: OTAP framework as App-Dev OS root-template
 
-- **Status**: Accepted
+- **Status**: Partially superseded by [ADR-0007](0007-single-branch-no-pr-workflow.md) on 2026-05-08
 - **Date**: 2026-05-07
 - **Decider(s)**: pim
 - **Supersedes**: —
+
+> **Status note (2026-05-08):** ADR-0007 supersedes the workflow decisions
+> in this ADR (PR gates, two test layers, single shared CI workflow,
+> feature → dev → main promotion path). The Supabase-isolation, env-var
+> naming, manual production migration, and branch-prefix decisions in this
+> ADR remain in force. See ADR-0007 for the new single-branch model.
 
 ## Context
 

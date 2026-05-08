@@ -88,17 +88,27 @@ When the user asks to add an app:
 
 ### Branching Policy
 
-| Zone | Paths | On `dev` | On `feature/*` |
-|------|-------|----------|----------------|
-| **Code** | `src/**`, `tests/**`, runtime JS/TS/Py | Strong nudge: use `/new-feature` | Commit directly |
-| **Config** | `.claude/skills/*/SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `.env.example`, `scripts/*.sh`, `.claude/settings.json` | Advisory: consider feature branch | Commit directly |
-| **Context** | `code_context/`, `brand_context/`, `context/`, `cron/jobs/`, `apps/*/`, `projects/` | Commit directly | Commit directly |
+Single-branch workflow — see [ADR-0007](ADR/0007-single-branch-no-pr-workflow.md) (supersedes the workflow parts of [ADR-0005](ADR/0005-otap-framework.md)).
 
-**`main` and `master` are HARD-BLOCKED for writes/commits/pushes** by `branch-guard.js` hook. Force pushes denied by permissions. CI required to merge.
+| Branch | Purpose |
+|--------|---------|
+| `main` | The only long-lived branch. Vercel auto-deploys on push. |
+| `feature/<slug>` | Where work happens. Branched from main, squash-merged back. |
 
-**`dev` is the working branch.** Feature branches merge back to `dev`, then `dev` is promoted to `main` via PR.
+Four branch prefixes only: `feature/`, `fix/`, `chore/`, `hotfix/`.
 
-**OTAP framework** — branching here implements the OTAP discipline (Ontwikkeling, Test, Acceptatie, Productie) for App-Dev OS. `feature/*` branches are **O**ntwikkeling, local + CI checks are **T**est, Vercel preview deployments per PR are **A**cceptatie, `main` is **P**roductie. Four branch prefixes only: `feature/`, `fix/`, `chore/`, `hotfix/`. See [`code_context/otap.md`](code_context/otap.md) for the operational reference and [ADR-0005](ADR/0005-otap-framework.md) for the rationale.
+**Daily flow:**
+1. `git checkout -b feature/<slug>` from main
+2. Code + iterate locally
+3. Manual pre-merge tests: `npm run build` + `npx vitest run` (your discipline — no CI gate)
+4. `git checkout main && git merge --squash feature/<slug> && git commit && git push origin main`
+5. Vercel deploys main → production
+
+**`main` is advisory-protected, not hard-blocked.** `branch-guard.js` hook prints a reminder when you write/commit/push directly on main but does not block. Force pushes (`git push --force`) remain denied. GitHub branch protection retains `linear history`, `no force push`, `no deletions`.
+
+**No PR ceremony, no CI gate.** Vercel build is the structural last-line-of-defense — broken builds fail the deploy and production stays on the previous version. Rollback via Vercel dashboard ("Promote previous deploy").
+
+See [`code_context/otap.md`](code_context/otap.md) for the operational reference.
 
 ### Before Major Deliverables
 
@@ -406,7 +416,7 @@ Some skills use external services for enhanced functionality. API keys are store
 - `Edit`/`Write` scoped to project paths (incl. `.claude/**` for skill/hook self-modification, root `*.md|json|toml|yaml|yml`)
 
 **Hard-denied:**
-- Destructive: `rm -rf` (root/home/cwd/dot), `git push --force`, push to `main/master/production`, `git reset --hard origin/main|master`, `chmod 777 *`
+- Destructive: `rm -rf` (root/home/cwd/dot), `git push --force`, `git reset --hard origin/main|master`, `chmod 777 *`
 - Package uninstalls: `npm/yarn/pip uninstall|remove` (note: `pnpm remove *` IS allowed)
 - Network: `curl *`, `wget *`, `ssh *`, `scp *` (read/write goes via SDK, not raw HTTP)
 - Secrets: `Read`/`Edit`/`Write` of `.env`, `.env.local`, `.env.production`, `.env.development.local`, `.env.test.local`, anything matching `**/secrets/**`, `*credential*`, `*.pem|key|p12|pfx`
@@ -418,7 +428,7 @@ Some skills use external services for enhanced functionality. API keys are store
 - General `git push *` (only the destructive variants are denied; ordinary push prompts)
 
 Hooks add behavioural guards on top of permissions:
-- `branch-guard.js` — BLOCKS writes/commits/pushes on `main`/`master`/`production`
+- `branch-guard.js` — ADVISORY warning when working on `main`/`master`/`production` (per ADR-0007); does not block
 - `secret-scan.js` — BLOCKS secrets in file content or bash commands
 - `dangerous-bash.js` — BLOCKS high-blast-radius commands (verifies `supabase db reset` does NOT trigger — only `git reset --hard` literal does)
 - `lockfile-guard.js` — BLOCKS direct edits to lockfiles

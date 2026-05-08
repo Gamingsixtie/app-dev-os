@@ -109,7 +109,8 @@ These apply to this app without re-declaring:
 - Memory model: `git log` + `ADR/` (root + per-app) + `learnings.md` (root + per-app)
 - Promotion path: skill-learnings → conventions → ADR
 - Output standards from root: `projects/{category}-{type}/` for Level 1 deliverables
-- **OTAP framework** ([ADR-0005](../../ADR/0005-otap-framework.md)) — branching policy, two-Supabase isolation, Vercel preview-per-branch, single shared CI workflow with path filter for `apps/concurrentoolVO/**`, manual production migrations
+- **Workflow** ([ADR-0007](../../ADR/0007-single-branch-no-pr-workflow.md), supersedes the workflow parts of [ADR-0005](../../ADR/0005-otap-framework.md)) — single-branch (`main`), feature branches squash-merged directly, manual pre-merge testing, no PR ceremony, no CI gate, Vercel auto-deploys main → production
+- **Two-Supabase isolation** ([ADR-0005](../../ADR/0005-otap-framework.md)) — still active: dev + prod project per app, Vercel env-var scoping, manual production migrations
 
 ---
 
@@ -139,12 +140,12 @@ Until the manual user actions are done, the app effectively runs in pre-OTAP mod
 
 The pre-existing `CLAUDE.md` (before App-Dev OS import) contained: *"Na elke goedgekeurde wijziging: automatisch committen EN pushen naar remote."*
 
-**This is superseded under App-Dev OS:**
-- `branch-guard` hook hard-blocks pushes to `main`/`master` regardless of source — auto-pushing to those branches now fails by design
-- Impact-based-autonomy from root `USER.md`: deploys to production are high-impact and require explicit approval, not auto-push
-- Commit-after-approval is fine (encouraged by DEV_ETHOS); push-after-approval is fine on `dev`/`feature/*` branches; push to `main` always requires PR + explicit OK
+**Current rule under App-Dev OS (per ADR-0007):**
+- `branch-guard` hook prints an advisory warning when working on `main` but does not block — direct push to main is allowed
+- Impact-based-autonomy from root `USER.md`: production deploys are high-impact — direct push to main triggers Vercel deploy, so explicit approval before pushing main is still expected
+- Commit-after-approval is fine (encouraged by DEV_ETHOS); push to `feature/*` automatically allowed; push to `main` allowed but only after explicit OK and the manual pre-merge test ritual (`npm run build` + `npx vitest run`)
 
-**Effective rule for this app**: commit after approved changes (with `pnpm tsc --noEmit` passing, but here `npm run build` since this app uses npm — see Phase 2 conventions). Push to `dev` or `feature/*` automatically allowed. Push to `main` blocked + requires PR flow.
+**Effective rule for this app**: feature branches commit + push freely. Squash-merge to main + push to main happens only after the manual pre-merge tests pass and you give explicit OK.
 
 ### Build command override (this app uses npm not pnpm)
 
