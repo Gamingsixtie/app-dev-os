@@ -1,6 +1,7 @@
 import type { ProviderPriceCalculator, ModulePriceResult } from './types';
 import type { CitoProviderConfig, CitoBundleType } from '@/data/providers/cito';
 import { getCitoBundle } from '@/data/providers/cito';
+import { buildOverrideResult } from './shared';
 
 /**
  * Cito calculator: platform+module pricing with bundle logic.
@@ -32,19 +33,8 @@ export class CitoCalculator implements ProviderPriceCalculator {
     totalStudents: number,
     overridePrice?: number,
   ): ModulePriceResult | null {
-    // Override takes precedence
     if (overridePrice !== undefined) {
-      return {
-        pricePerStudent: overridePrice,
-        totalCost: overridePrice * totalStudents,
-        breakdown: [
-          {
-            label: `Schoolspecifieke prijs (overschrijving): EUR ${overridePrice.toFixed(2)}/lln`,
-            amount: overridePrice * totalStudents,
-          },
-        ],
-        isPackagePrice: false,
-      };
+      return buildOverrideResult(overridePrice, totalStudents);
     }
 
     // Look up module in defaultPrices

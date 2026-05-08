@@ -4,6 +4,7 @@ import {
   getDiaVolumeDiscountPercent,
   selectOptimalDiaPackage,
 } from '@/engine/dia-packages';
+import { buildOverrideResult } from './shared';
 
 /**
  * DIA calculator: package-bundle pricing with volume discount and package optimization.
@@ -27,19 +28,8 @@ export class DiaCalculator implements ProviderPriceCalculator {
     totalStudents: number,
     overridePrice?: number,
   ): ModulePriceResult | null {
-    // Override takes precedence
     if (overridePrice !== undefined) {
-      return {
-        pricePerStudent: overridePrice,
-        totalCost: overridePrice * totalStudents,
-        breakdown: [
-          {
-            label: `Schoolspecifieke prijs (overschrijving): EUR ${overridePrice.toFixed(2)}/lln`,
-            amount: overridePrice * totalStudents,
-          },
-        ],
-        isPackagePrice: false,
-      };
+      return buildOverrideResult(overridePrice, totalStudents);
     }
 
     // Look up base price
@@ -126,18 +116,7 @@ export class DiaCalculator implements ProviderPriceCalculator {
       const override = overridePrices?.get(moduleId);
 
       if (override !== undefined) {
-        // Override: use override price directly
-        results.set(moduleId, {
-          pricePerStudent: override,
-          totalCost: override * totalStudents,
-          breakdown: [
-            {
-              label: `Schoolspecifieke prijs (overschrijving): EUR ${override.toFixed(2)}/lln`,
-              amount: override * totalStudents,
-            },
-          ],
-          isPackagePrice: false,
-        });
+        results.set(moduleId, buildOverrideResult(override, totalStudents));
         continue;
       }
 
