@@ -20,6 +20,14 @@ export const loginRoute = createRoute({
   component: lazyRouteComponent(() => import('@/features/auth/LoginPage'), 'LoginPage'),
 });
 
+// Auth callback — Supabase magic-link landing, outside ProtectedRoute so the
+// PKCE ?code= handshake completes before any redirect can strip the query.
+export const authCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/auth/callback',
+  component: lazyRouteComponent(() => import('@/features/auth/AuthCallback'), 'AuthCallback'),
+});
+
 // Index route — smart redirect to overview
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -165,6 +173,7 @@ export const ROUTE_PATHS = {
 
 export const routeTree = rootRoute.addChildren([
   loginRoute,
+  authCallbackRoute,
   indexRoute,
   scholenRoute,
   reviewRoute,

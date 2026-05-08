@@ -203,7 +203,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithMagicLink = useCallback(
     async (email: string): Promise<{ error: string | null }> => {
       try {
-        const { error } = await supabase.auth.signInWithOtp({ email });
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
 
         if (error) {
           return { error: mapAuthError(error) };

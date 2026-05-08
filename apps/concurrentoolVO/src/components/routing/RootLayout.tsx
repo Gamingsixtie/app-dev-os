@@ -23,6 +23,7 @@ export default function RootLayout() {
   const { user, userProfile, loading } = useAuth();
   const routerState = useRouterState();
   const isLoginPage = routerState.location.pathname === '/login';
+  const isAuthCallback = routerState.location.pathname === '/auth/callback';
 
   // When SKIP_AUTH is on we never gate on migration, so seed the initial state
   // accordingly and short-circuit the effect below — avoids a synchronous
@@ -89,8 +90,9 @@ export default function RootLayout() {
     usePricingDataStore.getState().loadFromSupabase();
   }, [user, loading]);
 
-  // Login page is not protected
-  if (isLoginPage) {
+  // Login page and auth callback are not protected — the callback needs to
+  // run Supabase's PKCE exchange before any auth-guard can redirect away.
+  if (isLoginPage || isAuthCallback) {
     return <Outlet />;
   }
 

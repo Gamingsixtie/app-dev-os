@@ -1,10 +1,22 @@
 {
+  "_comment": "Template for .mcp.json. Copy this file to .mcp.json (gitignored) and fill in the placeholder credentials. See ADR/0006-supabase-mcp-dev-access.md for the supabase-dev rationale.",
   "mcpServers": {
     "heygen": {
       "command": "uvx",
       "args": ["heygen-mcp"],
       "env": {
         "HEYGEN_API_KEY": "your-heygen-api-key-here"
+      }
+    },
+    "supabase-dev": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=mhmivlzevnzbimhkniqu"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "REPLACE_WITH_YOUR_SUPABASE_PAT"
       }
     }
   }

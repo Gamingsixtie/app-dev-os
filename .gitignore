@@ -25,6 +25,12 @@
 **/.next/
 **/next-env.d.ts
 
+# Test coverage output (auto-generated)
+**/coverage/
+
+# Supabase CLI temp + linked-project metadata (per-machine)
+**/supabase/.temp/
+
 # Command Centre data (inside project folders)
 **/.command-centre/
 
