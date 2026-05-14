@@ -43,3 +43,4 @@
 # Cron runtime (logs and status are generated at runtime)
 cron/logs/
 cron/status/
+apps/Klantreis/
