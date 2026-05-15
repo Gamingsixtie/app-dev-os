@@ -8,6 +8,7 @@ import { devApiPlugin } from './vite-api-plugin';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiKey = env.VITE_ANTHROPIC_API_KEY;
+  const devPort = Number(env.VITE_DEV_PORT ?? 3000);
 
   return {
     plugins: [
@@ -94,6 +95,6 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    server: { port: 3003, strictPort: true },
+    server: { port: devPort, strictPort: true },
   };
 });
