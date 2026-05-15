@@ -173,6 +173,13 @@ export const exportRoute = createRoute({
   component: lazyRouteComponent(() => import('@/features/export/ExportTab')),
 });
 
+// Uitkomst tab (Phase 28-05 stub — placeholder until full DealOutcomesTab lands)
+export const uitkomstRoute = createRoute({
+  getParentRoute: () => schoolRoute,
+  path: '/uitkomst',
+  component: lazyRouteComponent(() => import('@/features/deal-outcomes/UitkomstTabStub')),
+});
+
 // Stichtingen overview (Phase 27 Plan 02 R1) — card-grid van bestuur-entiteiten
 export const stichtingenRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -221,6 +228,7 @@ export const SCHOOL_TAB_ROUTES = {
   gesprekken: '/scholen/$slug/gesprekken',
   schoolplan: '/scholen/$slug/schoolplan',
   export: '/scholen/$slug/export',
+  uitkomst: '/scholen/$slug/uitkomst',
 } as const;
 
 export const ROUTE_PATHS = {
@@ -248,5 +256,6 @@ export const routeTree = rootRoute.addChildren([
     schoolConversationsRoute,
     schoolplanRoute,
     exportRoute,
+    uitkomstRoute,
   ]),
 ]);
