@@ -27,7 +27,7 @@ describe('StartschermPage', () => {
     expect(links).toHaveLength(2);
   });
 
-  it("card 1 linkt naar /scholen en bevat 'Scholenoverzicht'", () => {
+  it("card 1 linkt naar /scholen en bevat 'scholenOverzicht'", () => {
     render(<StartschermPage />);
     const scholenLink = screen.getByRole('link', { name: /Scholenoverzicht/i });
     expect(scholenLink).toBeInTheDocument();

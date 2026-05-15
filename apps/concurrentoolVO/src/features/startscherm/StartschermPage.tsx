@@ -13,13 +13,13 @@ export function StartschermPage() {
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-        {/* Card A — Scholenoverzicht */}
+        {/* Card A — scholenOverzicht */}
         <Link
           to="/scholen"
           className="bg-white border border-neutral-200 rounded-lg p-8 hover:border-cito-primary hover:shadow-md transition-all min-h-[200px] flex flex-col items-center justify-center text-center"
         >
           <h2 className="text-xl font-semibold text-cito-primary mb-2">
-            Scholenoverzicht
+            scholenOverzicht
           </h2>
           <p className="text-sm text-neutral-600">
             Bekijk en beheer scholen, profielen en vergelijkingen

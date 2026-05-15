@@ -94,6 +94,6 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    server: { port: 3001, strictPort: true },
+    server: { port: 3003, strictPort: true },
   };
 });
