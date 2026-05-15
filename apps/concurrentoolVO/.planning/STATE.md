@@ -4,12 +4,13 @@ milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
 stopped_at: Completed 25-03-PLAN.md
-last_updated: "2026-03-31T13:38:10.939Z"
+last_updated: "2026-05-15T11:59:37.605Z"
 progress:
   total_phases: 24
   completed_phases: 19
   total_plans: 79
   completed_plans: 74
+  percent: 94
 ---
 
 # Project State
@@ -19,12 +20,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 25 — prijsintelligentie-stakeholder-feedback-loop
+**Current focus:** Phase 28 — win-loss-tracking-marktpositie-aparte-uitkomst-deal-tab-per-
 
 ## Current Position
 
-Phase: 25 (prijsintelligentie-stakeholder-feedback-loop) — EXECUTING
-Plan: 6 of 12
+Phase: 28 (win-loss-tracking-marktpositie-aparte-uitkomst-deal-tab-per-) — close-out (Plan 09 complete)
+Plan: 9 of 9 (Phase 28 closed: LostDealDialog deleted + tooltip + e2e + UAT-CHECKLIST landed; user UAT pending)
+
+Note: STATE.md on `main` reflects a different lineage than the feature branch
+that holds the rest of Phase 28's plan artifacts. After the user merges the
+phase-28 feature branches into main, this position block will reconcile with
+the canonical phase-28 state from those branches.
 
 ## Performance Metrics
 
@@ -151,6 +157,7 @@ Recent decisions affecting current work:
 - [Phase 25]: Allow amountPerStudent >= 0 in price provider tests (some providers have zero-price placeholder modules)
 - [Phase 25]: ProposalBadge uses statusConfig Record map pattern matching PriceBadge convention
 - [Phase 25]: useOpenProposalCount polls every 60s via refetchInterval for badge freshness
+- [Phase ?]: Phase 28-09 LostDealDialog physically deleted; tooltip + redirect-to-Uitkomst on dropdown verloren option and kanban drag-to-verloren; Playwright e2e and UAT-CHECKLIST committed
 
 ### Roadmap Evolution
 
@@ -172,6 +179,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-31T13:38:10.927Z
+Last session: 2026-05-15T11:59:31.643Z
 Stopped at: Completed 25-03-PLAN.md
 Resume file: None
