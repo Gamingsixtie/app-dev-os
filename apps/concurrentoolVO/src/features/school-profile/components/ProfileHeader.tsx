@@ -8,8 +8,6 @@ import {
   PIPELINE_STATUS_LABELS,
 } from '@/models/school';
 import type { PipelineStatus } from '@/models/school';
-import type { LostDealInfo } from '@/db/types';
-import LostDealDialog from './LostDealDialog';
 import PipelineReasonDialog from './PipelineReasonDialog';
 import { AuditMeta } from '@/components/ui/AuditMeta';
 import { SCHOOL_TAB_ROUTES } from '@/router/routes';
@@ -35,7 +33,6 @@ export default function ProfileHeader() {
   const { data: school } = useSchool(slug);
 
   const [pendingStatus, setPendingStatus] = useState<PipelineStatus | null>(null);
-  const [showLostDealDialog, setShowLostDealDialog] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
 
   // Format the "Laatst bewerkt" date (fallback to current date if no school data)
@@ -50,27 +47,20 @@ export default function ProfileHeader() {
 
     const validation = validatePipelineTransition(pipelineStatus, newStatus);
 
-    if (validation.requiresLostDeal) {
-      setPendingStatus(newStatus);
-      setShowLostDealDialog(true);
-      return;
-    }
-
-    if (validation.requiresReason) {
+    // Phase 28: LostDealDialog is verwijderd — lost-deal-info wordt geregistreerd
+    // op de Uitkomst-tab via DealAfsluitenDialog/LostDealForm. Pipeline-status
+    // muteert hier atomair zonder dialog; eventuele reden-vereiste blijft via
+    // PipelineReasonDialog lopen.
+    if (validation.requiresReason && !validation.requiresLostDeal) {
       setPendingStatus(newStatus);
       setShowReasonDialog(true);
       return;
     }
 
-    // Direct transition (forward, not to verloren)
+    // Direct transition — including the previous LostDealDialog branch.
+    // The user is steered toward the Uitkomst-tab via the helper text below
+    // the dropdown (rendered when pipelineStatus === 'verloren').
     setPipelineStatus(activeSchoolId, newStatus);
-  };
-
-  const handleLostDealConfirm = (info: LostDealInfo) => {
-    if (!activeSchoolId || !pendingStatus) return;
-    setPipelineStatus(activeSchoolId, pendingStatus, undefined, info);
-    setShowLostDealDialog(false);
-    setPendingStatus(null);
   };
 
   const handleReasonConfirm = (reason: string) => {
@@ -81,7 +71,6 @@ export default function ProfileHeader() {
   };
 
   const handleDialogCancel = () => {
-    setShowLostDealDialog(false);
     setShowReasonDialog(false);
     setPendingStatus(null);
   };
@@ -128,38 +117,55 @@ export default function ProfileHeader() {
           </div>
 
           {/* Right side: pipeline dropdown + CTA */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <select
-              ref={dropdownRef}
-              value={pipelineStatus}
-              onChange={(e) => handleStatusChange(e.target.value as PipelineStatus)}
-              className="h-11 px-4 bg-white border border-neutral-200 rounded-lg text-[14px] text-neutral-700 cursor-pointer"
-            >
-              {PIPELINE_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {PIPELINE_STATUS_LABELS[status]}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <select
+                ref={dropdownRef}
+                value={pipelineStatus}
+                onChange={(e) => handleStatusChange(e.target.value as PipelineStatus)}
+                className="h-11 px-4 bg-white border border-neutral-200 rounded-lg text-[14px] text-neutral-700 cursor-pointer"
+              >
+                {PIPELINE_STATUSES.map((status) => (
+                  <option
+                    key={status}
+                    value={status}
+                    title={
+                      status === 'verloren'
+                        ? 'Tip: leg de deal-uitkomst vast op de Uitkomst-tab voor markt-inzicht.'
+                        : undefined
+                    }
+                  >
+                    {PIPELINE_STATUS_LABELS[status]}
+                  </option>
+                ))}
+              </select>
 
-            <button
-              type="button"
-              onClick={handleSmartCTA}
-              className="h-11 px-6 bg-cito-accent text-white text-[14px] font-semibold rounded-lg hover:opacity-90 whitespace-nowrap"
-            >
-              {SMART_CTA[pipelineStatus].label}
-            </button>
+              <button
+                type="button"
+                onClick={handleSmartCTA}
+                className="h-11 px-6 bg-cito-accent text-white text-[14px] font-semibold rounded-lg hover:opacity-90 whitespace-nowrap"
+              >
+                {SMART_CTA[pipelineStatus].label}
+              </button>
+            </div>
+            {pipelineStatus === 'verloren' && (
+              <p className="text-[12px] text-neutral-500 mt-1">
+                Tip: leg de deal-uitkomst vast op de{' '}
+                <Link
+                  to={SCHOOL_TAB_ROUTES.uitkomst}
+                  params={{ slug }}
+                  className="underline text-cito-primary hover:opacity-80"
+                >
+                  Uitkomst-tab
+                </Link>{' '}
+                voor markt-inzicht.
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Dialogs */}
-      {showLostDealDialog && (
-        <LostDealDialog
-          onConfirm={handleLostDealConfirm}
-          onCancel={handleDialogCancel}
-        />
-      )}
+      {/* Reason dialog (lost-deal-info is registered via Uitkomst-tab, see Phase 28) */}
       {showReasonDialog && pendingStatus && (
         <PipelineReasonDialog
           fromLabel={PIPELINE_STATUS_LABELS[pipelineStatus]}

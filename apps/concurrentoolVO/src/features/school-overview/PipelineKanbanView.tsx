@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import {
   DndContext,
   DragOverlay,
@@ -22,9 +23,7 @@ import { PIPELINE_STATUSES, PIPELINE_STATUS_LABELS } from '@/models/school';
 import { setPipelineStatus, validatePipelineTransition } from '@/db/operations';
 import PipelineBadge from '@/components/ui/PipelineBadge';
 import DmuProgressIndicator from './DmuProgressIndicator';
-import LostDealDialog from '@/features/school-profile/components/LostDealDialog';
 import PipelineReasonDialog from '@/features/school-profile/components/PipelineReasonDialog';
-import type { LostDealInfo } from '@/db/types';
 
 interface PipelineKanbanViewProps {
   schools: SchoolRecord[];
@@ -121,6 +120,11 @@ interface PendingTransition {
   fromStatus: PipelineStatus;
   toStatus: PipelineStatus;
   requiresReason: boolean;
+  /**
+   * Phase 28: kept in the type for backward-compat with the reason-dialog branch.
+   * Post-Phase-28 this is always false — lost-deal info is captured on the
+   * Uitkomst-tab, not via this dialog. See B2 fix in 28-09-PLAN.
+   */
   requiresLostDeal: boolean;
 }
 
@@ -129,6 +133,7 @@ export default function PipelineKanbanView({
   cardMode,
   onDeleteSchool: _onDeleteSchool,
 }: PipelineKanbanViewProps) {
+  const navigate = useNavigate();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pendingTransition, setPendingTransition] = useState<PendingTransition | null>(null);
 
@@ -175,14 +180,26 @@ export default function PipelineKanbanView({
     const validation = validatePipelineTransition(school.pipelineStatus, targetStatus);
     if (!validation.allowed) return;
 
-    if (validation.requiresLostDeal || validation.requiresReason) {
+    // Phase 28 B2 fix: lost-deal info is now captured on the Uitkomst-tab,
+    // not via the (deleted) LostDealDialog. Apply the status change immediately,
+    // then navigate the user to the Uitkomst-tab so they can register the
+    // deal details there.
+    if (validation.requiresLostDeal) {
+      await setPipelineStatus(schoolId, targetStatus);
+      navigate({ to: '/scholen/$slug/uitkomst', params: { slug: school.slug } });
+      return;
+    }
+
+    if (validation.requiresReason) {
       setPendingTransition({
         schoolId,
         school,
         fromStatus: school.pipelineStatus,
         toStatus: targetStatus,
-        requiresReason: validation.requiresReason,
-        requiresLostDeal: validation.requiresLostDeal,
+        requiresReason: true,
+        // Always false post-Phase-28; kept in the type for backward compat
+        // with the reason-dialog branch.
+        requiresLostDeal: false,
       });
       return;
     }
@@ -194,17 +211,6 @@ export default function PipelineKanbanView({
   const handleReasonConfirm = async (reason: string) => {
     if (!pendingTransition) return;
     await setPipelineStatus(pendingTransition.schoolId, pendingTransition.toStatus, reason);
-    setPendingTransition(null);
-  };
-
-  const handleLostDealConfirm = async (info: LostDealInfo) => {
-    if (!pendingTransition) return;
-    await setPipelineStatus(
-      pendingTransition.schoolId,
-      pendingTransition.toStatus,
-      info.reason,
-      info,
-    );
     setPendingTransition(null);
   };
 
@@ -273,15 +279,8 @@ export default function PipelineKanbanView({
         </DragOverlay>
       </DndContext>
 
-      {/* Pipeline transition dialogs */}
-      {pendingTransition?.requiresLostDeal && (
-        <LostDealDialog
-          onConfirm={handleLostDealConfirm}
-          onCancel={handleDialogCancel}
-        />
-      )}
-
-      {pendingTransition && pendingTransition.requiresReason && !pendingTransition.requiresLostDeal && (
+      {/* Reason dialog (lost-deal-info is registered via Uitkomst-tab — Phase 28) */}
+      {pendingTransition && pendingTransition.requiresReason && (
         <PipelineReasonDialog
           fromLabel={PIPELINE_STATUS_LABELS[pendingTransition.fromStatus]}
           toLabel={PIPELINE_STATUS_LABELS[pendingTransition.toStatus]}
