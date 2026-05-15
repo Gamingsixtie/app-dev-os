@@ -1,15 +1,29 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { studentCountsSchema, type StudentCountsData } from '../schemas/step2-schema.ts';
-import { SCHOOL_LEVEL_LABELS, YEARS_PER_LEVEL, type SchoolLevel } from '../../../models/school.ts';
+import {
+  SCHOOL_LEVEL_LABELS,
+  YEARS_PER_LEVEL,
+  type SchoolLevel,
+  type CurrentToolUsage,
+} from '../../../models/school.ts';
 import { SCHOOL_SIZE_PRESETS } from '../../../data/school-profiles.ts';
 import { useSchoolProfileStore } from '../store.ts';
 import StepContainer from '../../../components/wizard/StepContainer.tsx';
+import CurrentToolPerLevel from './CurrentToolPerLevel.tsx';
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { WizardStepRef } from './WizardStep1.tsx';
 
 const WizardStep2 = forwardRef<WizardStepRef>(function WizardStep2(_props, ref) {
-  const { levels, studentCounts, setStudentCounts, applyPreset } = useSchoolProfileStore();
+  const {
+    levels,
+    studentCounts,
+    setStudentCounts,
+    applyPreset,
+    currentToolUsage,
+    setCurrentToolUsage,
+    setCurrentToolUsageMap,
+  } = useSchoolProfileStore();
   const [activePreset, setActivePreset] = useState<string | null>(null);
 
   const buildDefaultValues = (): StudentCountsData => {
@@ -20,18 +34,32 @@ const WizardStep2 = forwardRef<WizardStepRef>(function WizardStep2(_props, ref) 
         counts[level][String(year)] = studentCounts[level]?.[year] ?? 0;
       }
     }
-    return { studentCounts: counts };
+    // Phase 27 R5 — seed currentToolUsage van store (empty {} default uit schema)
+    return { studentCounts: counts, currentToolUsage: { ...currentToolUsage } };
   };
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<StudentCountsData>({
     resolver: zodResolver(studentCountsSchema),
     defaultValues: buildDefaultValues(),
   });
+
+  // Phase 27 R5 — watch the per-niveau map so radio-state stays in sync with
+  // the form when ouder-component re-renders (store + form dual-source).
+  const watchedCurrentToolUsage = watch('currentToolUsage') ?? {};
+
+  const handleCurrentToolUsageChange = (
+    level: SchoolLevel,
+    val: CurrentToolUsage,
+  ) => {
+    setValue(`currentToolUsage.${level}`, val, { shouldValidate: false });
+    setCurrentToolUsage(level, val);
+  };
 
   const handlePresetClick = (presetId: 'klein' | 'midden' | 'groot') => {
     applyPreset(presetId);
@@ -66,6 +94,11 @@ const WizardStep2 = forwardRef<WizardStepRef>(function WizardStep2(_props, ref) 
               }
             }
             setStudentCounts(converted);
+            // Phase 27 R5 — mirror form's final currentToolUsage to store on
+            // submit (defense-in-depth; per-radio onChange already writes-through).
+            if (data.currentToolUsage) {
+              setCurrentToolUsageMap(data.currentToolUsage);
+            }
             resolve(true);
           },
           () => {
@@ -159,6 +192,16 @@ const WizardStep2 = forwardRef<WizardStepRef>(function WizardStep2(_props, ref) 
         <p className="mt-3 text-[14px] text-red-600" role="alert">
           {errors.studentCounts.message}
         </p>
+      )}
+
+      {/* Phase 27 R5 — per-niveau huidig-gebruik (Cito / DIA / JIJ! / Mix / Geen).
+          Optioneel: blokkeert Next-knop niet (currentToolUsage default {}). */}
+      {levels.length > 0 && (
+        <CurrentToolPerLevel
+          levels={levels}
+          value={watchedCurrentToolUsage}
+          onChange={handleCurrentToolUsageChange}
+        />
       )}
     </StepContainer>
   );

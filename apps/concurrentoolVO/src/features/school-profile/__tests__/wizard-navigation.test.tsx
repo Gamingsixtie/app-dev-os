@@ -117,6 +117,10 @@ describe('Wizard Navigation', () => {
     // Step 1: select HAVO
     const havoCheckbox = screen.getByRole('checkbox', { name: /HAVO/i });
     await user.click(havoCheckbox);
+    // Phase 27 Plan 03 (R3 + R4) — Step 1 has 3 additional required fields.
+    await user.click(screen.getByRole('radio', { name: 'Huidige Cito-klant' }));
+    await user.selectOptions(screen.getByLabelText('Schoolsoort:'), 'regulier');
+    await user.click(screen.getByRole('radio', { name: 'Groeit' }));
 
     // Navigate forward
     await user.click(screen.getByText('Volgende stap'));
@@ -157,8 +161,12 @@ describe('Wizard Navigation', () => {
     const nameInput = await screen.findByLabelText('Schoolnaam');
     await user.type(nameInput, 'Test School');
 
-    // Complete step 1: select HAVO and navigate forward
+    // Complete step 1: select HAVO + new required fields, then navigate forward.
     await user.click(screen.getByRole('checkbox', { name: /HAVO/i }));
+    // Phase 27 Plan 03 (R3 + R4) — Step 1 has 3 additional required fields.
+    await user.click(screen.getByRole('radio', { name: 'Huidige Cito-klant' }));
+    await user.selectOptions(screen.getByLabelText('Schoolsoort:'), 'regulier');
+    await user.click(screen.getByRole('radio', { name: 'Groeit' }));
     await user.click(screen.getByText('Volgende stap'));
 
     // Should be on step 2

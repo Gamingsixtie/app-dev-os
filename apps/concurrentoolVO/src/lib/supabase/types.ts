@@ -15,6 +15,31 @@ export type ProposalStatus = 'open' | 'approved' | 'rejected';
 export type AuditAction = 'created' | 'updated' | 'approved' | 'rejected' | 'seeded';
 export type AuditEntityType = 'publication_price' | 'pricing_config' | 'price_proposal';
 
+// Phase 28 Plan 02 — deal-outcome lifecycle enums (DB-side strings, mirrors
+// Zod enums in src/features/deal-outcomes/schemas/).
+export type DealStatusEnum =
+  | 'open'
+  | 'in_negotiation'
+  | 'won'
+  | 'lost'
+  | 'archived';
+export type DealCompetitorProviderDb = 'dia' | 'jij' | 'saqi' | 'overig';
+export type DealDiscountProviderDb = 'cito' | 'dia' | 'jij' | 'saqi';
+export type DealReasonCategoryDb =
+  | 'prijs'
+  | 'functionaliteit'
+  | 'voorkeur'
+  | 'anders';
+export type DealAuditActionDb =
+  | 'outcome_created'
+  | 'outcome_updated'
+  | 'status_changed'
+  | 'discount_added'
+  | 'discount_updated'
+  | 'discount_deleted';
+export type DealAuditEntityTypeDb = 'deal_outcome' | 'deal_discount';
+export type OnderwijsvisieDb = 'dalton' | 'montessori' | 'regulier' | 'lyceum';
+
 export interface Database {
   public: {
     Tables: {
@@ -88,6 +113,16 @@ export interface Database {
           region: string;
           tags: string[];
           view_preference: string;
+          stichting_id: string | null;
+          // Phase 27 Plan 03 — sales-context fields (migration 015)
+          customer_type: string | null;
+          school_type: string | null;
+          custom_school_type: string | null;
+          growth_trajectory: string | null;
+          // Phase 27 Plan 05 — currentToolUsage per-niveau map (migration 016)
+          current_tool_usage: Json;
+          // Phase 28 Plan 02 — cohort-feature onderwijsvisie (migration 017)
+          onderwijsvisie: OnderwijsvisieDb | null;
           created_by: string | null;
           updated_by: string | null;
           created_at: string;
@@ -114,6 +149,13 @@ export interface Database {
           region?: string;
           tags?: string[];
           view_preference?: string;
+          stichting_id?: string | null;
+          customer_type?: string | null;
+          school_type?: string | null;
+          custom_school_type?: string | null;
+          growth_trajectory?: string | null;
+          current_tool_usage?: Json;
+          onderwijsvisie?: OnderwijsvisieDb | null;
           created_by?: string | null;
           updated_by?: string | null;
           created_at?: string;
@@ -140,6 +182,13 @@ export interface Database {
           region?: string;
           tags?: string[];
           view_preference?: string;
+          stichting_id?: string | null;
+          customer_type?: string | null;
+          school_type?: string | null;
+          custom_school_type?: string | null;
+          growth_trajectory?: string | null;
+          current_tool_usage?: Json;
+          onderwijsvisie?: OnderwijsvisieDb | null;
           created_by?: string | null;
           updated_by?: string | null;
           created_at?: string;
@@ -657,9 +706,186 @@ export interface Database {
         };
         Relationships: [];
       };
+      stichtingen: {
+        Row: {
+          id: string;
+          team_id: string;
+          name: string;
+          region: string;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          name: string;
+          region?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          name?: string;
+          region?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      // Phase 28 Plan 02 — deal-outcome lifecycle + per-deal discounts + audit log
+      // (migration 018_deal_outcomes.sql).
+      deal_outcomes: {
+        Row: {
+          id: string;
+          school_id: string;
+          team_id: string;
+          status: DealStatusEnum;
+          competitor_provider: DealCompetitorProviderDb;
+          competitor_name: string | null;
+          reason: string | null;
+          reason_category: DealReasonCategoryDb | null;
+          contact_id: string | null;
+          comparison_snapshot: Json;
+          decided_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          school_id: string;
+          team_id: string;
+          status?: DealStatusEnum;
+          competitor_provider: DealCompetitorProviderDb;
+          competitor_name?: string | null;
+          reason?: string | null;
+          reason_category?: DealReasonCategoryDb | null;
+          contact_id?: string | null;
+          comparison_snapshot: Json;
+          decided_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          school_id?: string;
+          team_id?: string;
+          status?: DealStatusEnum;
+          competitor_provider?: DealCompetitorProviderDb;
+          competitor_name?: string | null;
+          reason?: string | null;
+          reason_category?: DealReasonCategoryDb | null;
+          contact_id?: string | null;
+          comparison_snapshot?: Json;
+          decided_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      deal_discounts: {
+        Row: {
+          id: string;
+          deal_outcome_id: string;
+          module_id: string;
+          provider: DealDiscountProviderDb;
+          discount_percentage: number | null;
+          discount_amount: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          deal_outcome_id: string;
+          module_id: string;
+          provider: DealDiscountProviderDb;
+          discount_percentage?: number | null;
+          discount_amount?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          deal_outcome_id?: string;
+          module_id?: string;
+          provider?: DealDiscountProviderDb;
+          discount_percentage?: number | null;
+          discount_amount?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      deal_audit_log: {
+        Row: {
+          id: string;
+          deal_outcome_id: string;
+          user_id: string;
+          action: DealAuditActionDb;
+          entity_type: DealAuditEntityTypeDb | null;
+          entity_id: string | null;
+          before_value: Json | null;
+          after_value: Json | null;
+          timestamp: string;
+        };
+        Insert: {
+          id?: string;
+          deal_outcome_id: string;
+          user_id?: string;
+          action: DealAuditActionDb;
+          entity_type?: DealAuditEntityTypeDb | null;
+          entity_id?: string | null;
+          before_value?: Json | null;
+          after_value?: Json | null;
+          timestamp?: string;
+        };
+        // Append-only — no UPDATE policy on the DB side. We still expose an
+        // empty-shape Update to satisfy the Database['Tables'][_]['Update']
+        // index lookups; runtime RLS denies the write.
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
-      [_ in never]: never;
+      // Phase 28 Plan 03 — deal_cohort_stats materialized view (migration 019).
+      // Aggregates deal_outcomes per (team_id, onderwijsvisie, primary_level).
+      // RLS does NOT apply to materialized views — team-scoping happens
+      // app-side via `.eq('team_id', currentTeamId)` in the Plan 08 hook.
+      // Insert/Update are `never` because matviews are read-only — TypeScript
+      // surfaces any accidental write attempt as a compile error.
+      deal_cohort_stats: {
+        Row: {
+          team_id: string;
+          onderwijsvisie: OnderwijsvisieDb;
+          // SchoolLevel union (mirrors src/models/school.ts) — DB stores the
+          // exact level string via UNNEST(schools.levels); narrowed here.
+          primary_level: 'vmbo-b' | 'vmbo-k' | 'vmbo-gt' | 'havo' | 'vwo';
+          total_deals: number;
+          won_deals: number;
+          lost_deals: number;
+          open_deals: number;
+          // 0-100 percent with one decimal (matview ROUND(..., 1) * 100).
+          // Null when the cohort has no `won` or `lost` deals (only open /
+          // in_negotiation) — denominator NULLIF protection.
+          win_rate: number | null;
+          // MODE() WITHIN GROUP over reason_category of lost deals. Null when
+          // no lost deals OR no reason_category recorded on lost deals.
+          top_lost_reason: DealReasonCategoryDb | null;
+        };
+        // Matviews are read-only — Insert/Update intentionally `never`.
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Functions: {
       get_user_team_id: {

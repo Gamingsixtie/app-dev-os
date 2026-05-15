@@ -50,6 +50,10 @@ describe('WizardStep1 - Schoolniveau selectie', () => {
 
     const havoCheckbox = screen.getByRole('checkbox', { name: /HAVO/i });
     await user.click(havoCheckbox);
+    // Phase 27 Plan 03 (R3 + R4) — these fields are now required by Zod.
+    await user.click(screen.getByRole('radio', { name: 'Huidige Cito-klant' }));
+    await user.selectOptions(screen.getByLabelText('Schoolsoort:'), 'regulier');
+    await user.click(screen.getByRole('radio', { name: 'Groeit' }));
 
     const result = await ref.current!.submit();
     expect(result).toBe(true);
@@ -81,6 +85,10 @@ describe('WizardStep1 - Schoolniveau selectie', () => {
     await user.type(screen.getByLabelText('Schoolnaam'), 'Mijn School');
     await user.click(screen.getByRole('checkbox', { name: /HAVO/i }));
     await user.click(screen.getByRole('checkbox', { name: /VWO/i }));
+    // Phase 27 Plan 03 (R3 + R4) — fill new required fields too.
+    await user.click(screen.getByRole('radio', { name: 'Huidige Cito-klant' }));
+    await user.selectOptions(screen.getByLabelText('Schoolsoort:'), 'regulier');
+    await user.click(screen.getByRole('radio', { name: 'Groeit' }));
 
     await ref.current!.submit();
 

@@ -44,3 +44,7 @@
 cron/logs/
 cron/status/
 apps/Klantreis/
+
+
+# Manual git worktrees (parallel-work setup; see ADR + Notion incident analysis 2026-05-15)
+.worktrees/

@@ -7,25 +7,51 @@ import { updateSchoolData } from '@/db/operations';
 import { uniqueSlug } from '@/lib/slugify';
 import StepContainer from '../../../components/wizard/StepContainer';
 import { useImperativeHandle, forwardRef } from 'react';
+import CustomerTypeRadio from './CustomerTypeRadio';
+import SchoolTypeFields from './SchoolTypeFields';
+import GrowthTrajectoryRadio from './GrowthTrajectoryRadio';
 
 export interface WizardStepRef {
   submit: () => Promise<boolean>;
 }
 
 const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) {
-  const { levels, schoolName, activeSchoolId, setLevels, setSchoolName } = useSchoolProfileStore();
+  const {
+    levels,
+    schoolName,
+    activeSchoolId,
+    customerType,
+    schoolType,
+    customSchoolType,
+    growthTrajectory,
+    setLevels,
+    setSchoolName,
+    setCustomerType,
+    setSchoolType,
+    setCustomSchoolType,
+    setGrowthTrajectory,
+  } = useSchoolProfileStore();
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<SchoolTypeData>({
     resolver: zodResolver(schoolTypeSchema),
     defaultValues: {
       schoolName: schoolName,
       levels: levels,
+      customerType: customerType ?? undefined,
+      schoolType: schoolType ?? undefined,
+      customSchoolType: customSchoolType ?? '',
+      growthTrajectory: growthTrajectory ?? undefined,
     },
   });
+
+  // Reactive watch so the conditional `customSchoolType` input toggles
+  // immediately when the user picks `overig` (Phase 27 R4 D-17 sub-component).
+  const watchedSchoolType = watch('schoolType');
 
   useImperativeHandle(ref, () => ({
     submit: () =>
@@ -34,6 +60,14 @@ const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) 
           async (data) => {
             setLevels(data.levels);
             setSchoolName(data.schoolName);
+            // Phase 27 Plan 03 — persist R3 + R4 fields to store. WizardShell's
+            // auto-save flow (handleNext) writes the new store state to Supabase.
+            setCustomerType(data.customerType);
+            setSchoolType(data.schoolType);
+            setCustomSchoolType(
+              data.schoolType === 'overig' ? data.customSchoolType ?? null : null,
+            );
+            setGrowthTrajectory(data.growthTrajectory);
 
             // Update slug and name in Dexie if school name changed
             if (activeSchoolId && data.schoolName !== schoolName) {
@@ -82,7 +116,7 @@ const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) 
       <label className="block text-sm font-semibold text-neutral-700 mb-1.5">
         Welke niveaus biedt uw school aan?
       </label>
-      <div className="space-y-0">
+      <div className="space-y-0 mb-6">
         {SCHOOL_LEVELS.map((level) => (
           <label
             key={level}
@@ -111,6 +145,29 @@ const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) 
           {errors.levels.message}
         </p>
       )}
+
+      {/* Phase 27 R3 — Customer type */}
+      <CustomerTypeRadio
+        registerProps={register('customerType')}
+        value={customerType}
+        error={errors.customerType?.message}
+      />
+
+      {/* Phase 27 R4 — Schoolsoort + optional custom label */}
+      <SchoolTypeFields
+        selectRegisterProps={register('schoolType')}
+        customInputRegisterProps={register('customSchoolType')}
+        value={watchedSchoolType ?? schoolType}
+        schoolTypeError={errors.schoolType?.message}
+        customSchoolTypeError={errors.customSchoolType?.message}
+      />
+
+      {/* Phase 27 R4 — Growth trajectory */}
+      <GrowthTrajectoryRadio
+        registerProps={register('growthTrajectory')}
+        value={growthTrajectory}
+        error={errors.growthTrajectory?.message}
+      />
     </StepContainer>
   );
 });

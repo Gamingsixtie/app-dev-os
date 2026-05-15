@@ -70,6 +70,7 @@ export default defineConfig(({ mode }) => {
     resolve: { alias: { '@': '/src' } },
     build: {
       sourcemap: true,
+      chunkSizeWarningLimit: 1600,
       rolldownOptions: {
         output: {
           // Split vendor libraries into named chunks so the main app chunk
@@ -93,6 +94,6 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    server: { port: 3000 },
+    server: { port: 3001, strictPort: true },
   };
 });

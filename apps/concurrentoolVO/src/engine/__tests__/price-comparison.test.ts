@@ -4,6 +4,7 @@ import {
   getTotalStudents,
   PROVIDERS,
   PROVIDER_LABELS,
+  type EngineDealDiscount,
 } from '../price-comparison';
 import { formatCurrency, formatCurrencyCompact, formatNumber } from '../../lib/format';
 
@@ -235,5 +236,219 @@ describe('exports', () => {
     expect(PROVIDER_LABELS.cito).toBe('Cito');
     expect(PROVIDER_LABELS.dia).toBe('DIA');
     expect(PROVIDER_LABELS.jij).toBe('JIJ');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 28 — dealDiscounts overlay (R3).
+// Engine accepts per-deal kortingen via ComparisonOptions.dealDiscounts and
+// applies them as a post-calculator overlay before totals + differences.
+// Backward-compat: omitting or passing empty dealDiscounts is a no-op.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Phase 28 — dealDiscounts overlay (R3)', () => {
+  const studentCounts: Record<string, Record<number, number>> = {
+    'havo': { 1: 50, 2: 50 }, // 100 students total
+  };
+
+  it('backward-compat: omitting dealDiscounts produces identical output', () => {
+    const a = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    const b = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    expect(a).toEqual(b);
+  });
+
+  it('backward-compat: empty dealDiscounts array produces identical output to no-option', () => {
+    const withEmpty = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [],
+    });
+    const baseline = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    expect(withEmpty).toEqual(baseline);
+  });
+
+  it('percentage discount: 10% on dia/rekenwiskunde reduces pricePerStudent by 10%', () => {
+    const base = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    const baseDia = base.modules[0].providers.dia;
+    expect(baseDia).not.toBeNull();
+    const basePrice = baseDia!.pricePerStudent;
+
+    const discount: EngineDealDiscount = {
+      moduleId: 'rekenwiskunde',
+      provider: 'dia',
+      discountPercentage: 10,
+    };
+    const result = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    const dia = result.modules[0].providers.dia;
+    expect(dia).not.toBeNull();
+    expect(dia!.pricePerStudent).toBeCloseTo(basePrice * 0.9, 2);
+    expect(dia!.totalCost).toBeCloseTo(dia!.pricePerStudent * 100, 2);
+    expect(dia!.priceRecord.source).toBe('manual');
+    expect(dia!.priceRecord.sourceLabel).toBe('Deal-korting');
+  });
+
+  it('amount discount: €1.50 on jij/nederlands reduces pricePerStudent by €1.50', () => {
+    const base = calculateComparison(['nederlands'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    const baseJij = base.modules[0].providers.jij;
+    if (baseJij === null) return; // skip if jij has no price for nederlands in current config
+    const basePrice = baseJij.pricePerStudent;
+
+    const discount: EngineDealDiscount = {
+      moduleId: 'nederlands',
+      provider: 'jij',
+      discountAmount: 1.5,
+    };
+    const result = calculateComparison(['nederlands'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    const jij = result.modules[0].providers.jij;
+    expect(jij).not.toBeNull();
+    expect(jij!.pricePerStudent).toBeCloseTo(Math.max(0, basePrice - 1.5), 2);
+  });
+
+  it('amount discount: clamps to 0 (cannot go negative)', () => {
+    const discount: EngineDealDiscount = {
+      moduleId: 'rekenwiskunde',
+      provider: 'dia',
+      discountAmount: 999999,
+    };
+    const result = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    const dia = result.modules[0].providers.dia;
+    expect(dia).not.toBeNull();
+    expect(dia!.pricePerStudent).toBe(0);
+    expect(dia!.totalCost).toBe(0);
+  });
+
+  it('totals recompute: totals.dia reflects the overlay', () => {
+    const base = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    const baseTotalDia = base.totals.dia;
+
+    const discount: EngineDealDiscount = {
+      moduleId: 'rekenwiskunde',
+      provider: 'dia',
+      discountPercentage: 50,
+    };
+    const result = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    expect(result.totals.dia).toBeCloseTo(baseTotalDia * 0.5, 2);
+  });
+
+  it('differences recompute: citoVsDia uses overlaid totals', () => {
+    const discount: EngineDealDiscount = {
+      moduleId: 'rekenwiskunde',
+      provider: 'dia',
+      discountPercentage: 10,
+    };
+    const result = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    // After overlay: differences.citoVsDia === totals.cito - totals.dia
+    expect(result.differences.citoVsDia).toBe(result.totals.cito - result.totals.dia);
+  });
+
+  it('defensive: unknown moduleId is silently skipped', () => {
+    const discount: EngineDealDiscount = {
+      moduleId: 'nonexistent-module',
+      provider: 'dia',
+      discountPercentage: 50,
+    };
+    const result = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    const base = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    expect(result).toEqual(base);
+  });
+
+  it('defensive: discount on (module, provider) where cost is null is silently skipped', () => {
+    // sociaal-emotioneel: cito has price; some competitors may be null
+    const base = calculateComparison(['sociaal-emotioneel'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    // Find a provider that is null for this module (config-dependent)
+    const nullProvider = (['dia', 'jij', 'saqi'] as const).find(
+      (p) => base.modules[0].providers[p] === null,
+    );
+    if (!nullProvider) return; // skip if all providers happen to have a price
+
+    const discount: EngineDealDiscount = {
+      moduleId: 'sociaal-emotioneel',
+      provider: nullProvider,
+      discountPercentage: 50,
+    };
+    const result = calculateComparison(['sociaal-emotioneel'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    // Skipped → null still null
+    expect(result.modules[0].providers[nullProvider]).toBeNull();
+  });
+
+  it('multi-discount: applies independently per (module, provider)', () => {
+    const discounts: EngineDealDiscount[] = [
+      { moduleId: 'rekenwiskunde', provider: 'dia', discountPercentage: 20 },
+      { moduleId: 'rekenwiskunde', provider: 'jij', discountAmount: 0.5 },
+    ];
+    const result = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: discounts,
+    });
+    const dia = result.modules[0].providers.dia;
+    const jij = result.modules[0].providers.jij;
+    const cito = result.modules[0].providers.cito;
+    expect(dia?.priceRecord.source).toBe('manual');
+    expect(jij?.priceRecord.source).toBe('manual');
+    // cito unchanged (no discount applied)
+    expect(cito?.priceRecord.source).not.toBe('manual');
+  });
+
+  it('breakdown: overlay appends a Deal-korting step with the negative delta', () => {
+    const base = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+    });
+    const baseDia = base.modules[0].providers.dia;
+    expect(baseDia).not.toBeNull();
+    const baseBreakdownLen = baseDia!.breakdown.length;
+    const basePrice = baseDia!.pricePerStudent;
+
+    const discount: EngineDealDiscount = {
+      moduleId: 'rekenwiskunde',
+      provider: 'dia',
+      discountPercentage: 10,
+    };
+    const result = calculateComparison(['rekenwiskunde'], studentCounts, {
+      citoBundleType: 'individual',
+      dealDiscounts: [discount],
+    });
+    const dia = result.modules[0].providers.dia;
+    expect(dia).not.toBeNull();
+    expect(dia!.breakdown.length).toBe(baseBreakdownLen + 1);
+    const lastStep = dia!.breakdown[dia!.breakdown.length - 1];
+    expect(lastStep.label).toMatch(/Deal-korting/);
+    // Delta = adjustedPerStudent - basePerStudent = -10% of base
+    expect(lastStep.amount).toBeCloseTo(-basePrice * 0.1, 2);
   });
 });

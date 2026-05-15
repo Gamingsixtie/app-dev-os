@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase/client';
 import type { SchoolRecord, Contact, Conversation, ActionItem, SystemEvent, LostDealInfo, PlannedTouchpoint } from './types';
+import { StichtingCascadeError, type StichtingRecord } from '@/models/stichting';
 import type { PipelineStatus, EngagementStatus } from '@/models/school';
 import { PIPELINE_STATUS_ORDER } from '@/models/school';
 import { contactSchema } from '@/features/school-profile/schemas/contact.schema';
@@ -82,6 +83,16 @@ function mapSchoolRow(row: any): SchoolRecord {
     createdBy: row.created_by,
     updatedBy: row.updated_by,
     ownerName: row.owner?.name ?? undefined,
+    stichtingId: row.stichting_id ?? null,
+    // Phase 27 Plan 03 — sales-context fields (R3 + R4)
+    customerType: row.customer_type ?? null,
+    schoolType: row.school_type ?? null,
+    customSchoolType: row.custom_school_type ?? null,
+    growthTrajectory: row.growth_trajectory ?? null,
+    // Phase 27 Plan 05 — currentToolUsage per-niveau map (R5). Postgres
+    // JSONB default is `{}` (migration 016) — fall back to `{}` defensively
+    // for any pre-migration cached row that still lacks the column.
+    currentToolUsage: row.current_tool_usage ?? {},
   };
 }
 
@@ -171,6 +182,14 @@ function mapSchoolUpdateToSnakeCase(data: Partial<SchoolRecord>): Record<string,
     region: 'region',
     tags: 'tags',
     viewPreference: 'view_preference',
+    stichtingId: 'stichting_id',
+    // Phase 27 Plan 03 — sales-context fields (R3 + R4)
+    customerType: 'customer_type',
+    schoolType: 'school_type',
+    customSchoolType: 'custom_school_type',
+    growthTrajectory: 'growth_trajectory',
+    // Phase 27 Plan 05 — currentToolUsage per-niveau map (R5)
+    currentToolUsage: 'current_tool_usage',
   };
 
   const result: Record<string, unknown> = {};
@@ -825,5 +844,188 @@ export async function deletePlannedTouchpoint(
   if (error) throw error;
 }
 
+// =============================================================================
+// Stichting CRUD (Phase 27 Plan 02 — R1, D-01, D-04)
+// =============================================================================
+
+function mapStichtingRow(row: Record<string, unknown>): StichtingRecord {
+  return {
+    id: row.id as string,
+    teamId: row.team_id as string,
+    name: row.name as string,
+    region: (row.region as string) ?? '',
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+    createdBy: (row.created_by as string) ?? undefined,
+    updatedBy: (row.updated_by as string) ?? undefined,
+  };
+}
+
+export interface StichtingCreateInput {
+  name: string;
+  region?: string;
+}
+
+export interface StichtingUpdateInput {
+  name?: string;
+  region?: string;
+}
+
+/**
+ * Create a new Stichting. Inserts into Supabase (team-scoped via RLS) and
+ * mirrors to Dexie on success.
+ */
+export async function createStichting(input: StichtingCreateInput): Promise<StichtingRecord> {
+  const user = await getCurrentUser();
+  const teamId = await getTeamId();
+
+  const { data, error } = await supabase.from('stichtingen')
+    .insert({
+      name: input.name,
+      region: input.region ?? '',
+      team_id: teamId,
+      created_by: user.id,
+      updated_by: user.id,
+    })
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return mapStichtingRow(data);
+}
+
+/**
+ * List all Stichtingen the current user can see (RLS-scoped to their team).
+ * Ordered by `updated_at` descending so the most recently touched bestuur
+ * appears first on the overview.
+ */
+export async function listStichtingen(): Promise<StichtingRecord[]> {
+  const { data, error } = await supabase.from('stichtingen')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((row) => mapStichtingRow(row as Record<string, unknown>));
+}
+
+/**
+ * Fetch a single Stichting by id. Returns `undefined` if not found (or RLS
+ * blocked).
+ */
+export async function getStichting(id: string): Promise<StichtingRecord | undefined> {
+  const { data, error } = await supabase.from('stichtingen')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) return undefined;
+  return mapStichtingRow(data as Record<string, unknown>);
+}
+
+/**
+ * Patch an existing Stichting. Only `name` and `region` are editable.
+ */
+export async function updateStichting(id: string, patch: StichtingUpdateInput): Promise<void> {
+  if (queueIfOffline('stichtingen', 'update', { id, ...patch })) return;
+  const user = await getCurrentUser();
+  const updateData: Record<string, unknown> = { updated_by: user.id };
+  if (patch.name !== undefined) updateData.name = patch.name;
+  if (patch.region !== undefined) updateData.region = patch.region;
+
+  const { error } = await supabase.from('stichtingen')
+    .update(updateData)
+    .eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * Delete a Stichting — guarded by D-04: throws `StichtingCascadeError`
+ * when one or more schools are still linked. Sales must explicitly
+ * unlink schools first via the detail-view "Scholen" tab.
+ */
+export async function deleteStichting(id: string): Promise<void> {
+  const { count, error: countError } = await supabase.from('schools')
+    .select('id', { count: 'exact', head: true })
+    .eq('stichting_id', id);
+  if (countError) throw countError;
+  const linkedCount = count ?? 0;
+  if (linkedCount > 0) {
+    throw new StichtingCascadeError(id, linkedCount);
+  }
+  const { error } = await supabase.from('stichtingen').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * List all schools currently linked to a Stichting. Returns the same
+ * camelCase shape as the rest of the school CRUD.
+ */
+export async function listSchoolsForStichting(stichtingId: string): Promise<SchoolRecord[]> {
+  const { data, error } = await supabase.from('schools')
+    .select('*, owner:users!owner_id(name)')
+    .eq('stichting_id', stichtingId)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((row) => mapSchoolRow(row));
+}
+
+/**
+ * Link an existing school to a Stichting. Overwrites any prior link.
+ * Bulk variant lands in Plan 27-07 (R11).
+ */
+export async function linkSchoolToStichting(schoolId: string, stichtingId: string): Promise<void> {
+  if (queueIfOffline('schools', 'update', { id: schoolId, stichting_id: stichtingId })) return;
+  const user = await getCurrentUser();
+  const { error } = await supabase.from('schools')
+    .update({ stichting_id: stichtingId, updated_by: user.id })
+    .eq('id', schoolId);
+  if (error) throw error;
+}
+
+/**
+ * Unlink a school from its Stichting (sets `stichting_id` to NULL).
+ */
+export async function unlinkSchoolFromStichting(schoolId: string): Promise<void> {
+  if (queueIfOffline('schools', 'update', { id: schoolId, stichting_id: null })) return;
+  const user = await getCurrentUser();
+  const { error } = await supabase.from('schools')
+    .update({ stichting_id: null, updated_by: user.id })
+    .eq('id', schoolId);
+  if (error) throw error;
+}
+
+/**
+ * Bulk-link N schools to a single Stichting in one Supabase `UPDATE ... WHERE id IN (...)`
+ * call (Phase 27 Plan 07, R11, D-03). Used by the smart-suggestion dialog
+ * on the Stichting-detail page.
+ *
+ * - No-op when `schoolIds` is empty (saves a needless round-trip).
+ * - Overwrites any prior `stichting_id` for the targeted rows — assume the
+ *   caller has already filtered out already-linked schools (smart-suggestion
+ *   does this via `suggestSchoolsForStichting`).
+ * - Cross-team writes are blocked by the existing schools UPDATE RLS policy
+ *   (mitigates threat T-27-07-03).
+ */
+export async function bulkLinkSchools(stichtingId: string, schoolIds: string[]): Promise<void> {
+  if (schoolIds.length === 0) return;
+  const user = await getCurrentUser();
+  const { error } = await supabase.from('schools')
+    .update({ stichting_id: stichtingId, updated_by: user.id })
+    .in('id', schoolIds);
+  if (error) throw error;
+}
+
+/**
+ * Bulk-unlink N schools from any Stichting in one Supabase call. Symmetric
+ * partner of `bulkLinkSchools` — kept here for future "verplaats meerdere
+ * scholen tegelijk" flows. Not currently wired into UI.
+ */
+export async function bulkUnlinkSchools(schoolIds: string[]): Promise<void> {
+  if (schoolIds.length === 0) return;
+  const user = await getCurrentUser();
+  const { error } = await supabase.from('schools')
+    .update({ stichting_id: null, updated_by: user.id })
+    .in('id', schoolIds);
+  if (error) throw error;
+}
+
 // Re-export mappers for use in hooks
-export { mapContactRow, mapConversationRow, mapActionRow, mapSystemEventRow, mapPlannedTouchpointRow };
+export { mapContactRow, mapConversationRow, mapActionRow, mapSystemEventRow, mapPlannedTouchpointRow, mapStichtingRow };

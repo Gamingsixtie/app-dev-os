@@ -1,6 +1,9 @@
 import type { ProviderKey } from '../engine/price-comparison';
 
-export type ModuleCategory = 'leerlingvolgsysteem' | 'overige-instrumenten';
+export type ModuleCategory =
+  | 'leerlingvolgsysteem'
+  | 'overige-instrumenten'
+  | 'extra-modules';
 
 export interface ModuleDefinition {
   id: string;
@@ -110,9 +113,47 @@ export const MODULE_CATALOG: ModuleDefinition[] = [
     aliases: ['Spaans', 'Spanish', 'MVT Spaans'],
     availableFrom: ['jij'],
   },
+  // Extra modules (Phase 27 R6) — wettelijk verplicht in VO per SLO kerndoelen
+  // 2025-2026 (definitief 1-8-2027), alle niveaus (VMBO B/K/GT, HAVO, VWO).
+  // Cito-only schijnvoordeel: DIA/JIJ/SAQI bieden deze modules niet aan.
+  // Niveau-onafhankelijk in dit model — alle niveaus worden bereikt omdat geen
+  // niveau-restrictie bestaat in MODULE_CATALOG en WizardStep3 geen niveau-filter
+  // toepast.
+  {
+    id: 'burgerschap',
+    name: 'Burgerschap',
+    description: 'Aansluitend op SLO kerndoelen burgerschap 2025-2026 (wettelijk verplicht VO)',
+    category: 'extra-modules',
+    separateLicense: false,
+    aliases: [
+      'Burgerschap',
+      'burgerschapsonderwijs',
+      'burgerschap-onderwijs',
+      'maatschappijleer-aanvullend',
+      'wereldburgerschap',
+    ],
+    availableFrom: ['cito'],
+  },
+  {
+    id: 'digitale-geletterdheid',
+    name: 'Digitale geletterdheid',
+    description: 'SLO-kerndoelen digitale geletterdheid + AI-geletterdheid (wettelijk verplicht VO)',
+    category: 'extra-modules',
+    separateLicense: false,
+    aliases: [
+      'Digitale geletterdheid',
+      'digitale-vaardigheden',
+      'AI-geletterdheid',
+      'mediawijsheid',
+      'computational-thinking',
+      'ICT-basisvaardigheden',
+    ],
+    availableFrom: ['cito'],
+  },
 ];
 
 export const MODULE_CATEGORIES: Record<ModuleCategory, string> = {
   'leerlingvolgsysteem': 'Leerlingvolgsysteem',
   'overige-instrumenten': 'Overige instrumenten',
+  'extra-modules': 'Extra Modules',
 };

@@ -22,12 +22,20 @@ describe('WizardStep3 - Module selectie', () => {
     expect(MODULE_CATALOG.length).toBeGreaterThanOrEqual(6);
   });
 
-  it('renders category headings "Leerlingvolgsysteem" and "Overige instrumenten"', () => {
+  it('renders section headings "Basisvaardigheden" and "Extra Modules" (Phase 27 R7)', () => {
+    // Phase 27 R7 restructured WizardStep3 into two top-level sections:
+    // Basisvaardigheden (rekenen/NL/EN/taalverzorging) en Extra Modules
+    // (al het andere incl. burgerschap + digitale-geletterdheid + MVT).
+    // Voorheen: "Leerlingvolgsysteem" / "Overige instrumenten" headings.
     const ref = createRef<WizardStepRef>();
     render(<WizardStep3 ref={ref} />);
 
-    expect(screen.getByText('Leerlingvolgsysteem')).toBeInTheDocument();
-    expect(screen.getByText('Overige instrumenten')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Basisvaardigheden' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Extra Modules' }),
+    ).toBeInTheDocument();
   });
 
   it('toggling a module card updates its visual state', async () => {

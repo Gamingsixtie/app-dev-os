@@ -50,6 +50,11 @@ export default function WizardShell() {
         moduleSetups: state.moduleSetups,
         scenario: state.scenario,
         name: state.schoolName,
+        // Phase 27 Plan 03 — sales-context fields (R3 + R4) persist via Step 1 store
+        customerType: state.customerType,
+        schoolType: state.schoolType,
+        customSchoolType: state.customSchoolType,
+        growthTrajectory: state.growthTrajectory,
         completedSteps: [...new Set([...newCompletedSteps, currentStep])],
         isComplete: currentStep === TOTAL_STEPS - 1,
       });

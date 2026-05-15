@@ -2,8 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { MODULE_CATALOG } from '../modules';
 
 describe('MODULE_CATALOG', () => {
-  it('has exactly 10 entries', () => {
-    expect(MODULE_CATALOG).toHaveLength(10);
+  it('has exactly 12 entries', () => {
+    // Phase 27 R6: 10 original + burgerschap + digitale-geletterdheid.
+    expect(MODULE_CATALOG).toHaveLength(12);
   });
 
   const expectedIds = [
@@ -17,9 +18,12 @@ describe('MODULE_CATALOG', () => {
     'frans',
     'duits',
     'spaans',
+    // Phase 27 R6 additions.
+    'burgerschap',
+    'digitale-geletterdheid',
   ];
 
-  it('contains all 10 module IDs', () => {
+  it('contains all 12 module IDs', () => {
     const ids = MODULE_CATALOG.map((m) => m.id);
     for (const id of expectedIds) {
       expect(ids).toContain(id);

@@ -88,6 +88,10 @@ describe('WizardShell - Step rendering and navigation', () => {
     const nameInput = await screen.findByLabelText('Schoolnaam');
     await user.type(nameInput, 'Test School');
     await user.click(screen.getByRole('checkbox', { name: /HAVO/i }));
+    // Phase 27 Plan 03 (R3 + R4) — Step 1 has 3 additional required fields.
+    await user.click(screen.getByRole('radio', { name: 'Huidige Cito-klant' }));
+    await user.selectOptions(screen.getByLabelText('Schoolsoort:'), 'regulier');
+    await user.click(screen.getByRole('radio', { name: 'Groeit' }));
 
     // Click next
     await user.click(screen.getByText('Volgende stap'));
@@ -104,6 +108,10 @@ describe('WizardShell - Step rendering and navigation', () => {
     const nameInput = await screen.findByLabelText('Schoolnaam');
     await user.type(nameInput, 'Test School');
     await user.click(screen.getByRole('checkbox', { name: /HAVO/i }));
+    // Phase 27 Plan 03 (R3 + R4) — Step 1 has 3 additional required fields.
+    await user.click(screen.getByRole('radio', { name: 'Huidige Cito-klant' }));
+    await user.selectOptions(screen.getByLabelText('Schoolsoort:'), 'regulier');
+    await user.click(screen.getByRole('radio', { name: 'Groeit' }));
     await user.click(screen.getByText('Volgende stap'));
 
     // Should be on step 2
@@ -143,6 +151,10 @@ describe('WizardShell - Step rendering and navigation', () => {
     await user.type(nameInput, 'Integratietest School');
     await user.click(screen.getByRole('checkbox', { name: /HAVO/i }));
     await user.click(screen.getByRole('checkbox', { name: /VWO/i }));
+    // Phase 27 Plan 03 (R3 + R4) — Step 1 has 3 additional required fields.
+    await user.click(screen.getByRole('radio', { name: 'Huidige Cito-klant' }));
+    await user.selectOptions(screen.getByLabelText('Schoolsoort:'), 'regulier');
+    await user.click(screen.getByRole('radio', { name: 'Groeit' }));
     await user.click(screen.getByText('Volgende stap'));
 
     // Verify step 1 data persisted to store

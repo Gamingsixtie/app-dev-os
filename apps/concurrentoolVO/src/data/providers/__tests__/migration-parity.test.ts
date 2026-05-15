@@ -41,10 +41,16 @@ describe('DEFAULT_PRICES migration parity', () => {
     { moduleId: 'spaans', provider: 'jij', amountPerStudent: 9.34 },
   ];
 
-  const allPrices = [...originalPrices, ...newPrices];
+  // Phase 27 R6 — Cito-only Extra modules (placeholder tarieven, owner vult in).
+  const phase27Prices: Array<{ moduleId: string; provider: string; amountPerStudent: number }> = [
+    { moduleId: 'burgerschap', provider: 'cito', amountPerStudent: 0 },
+    { moduleId: 'digitale-geletterdheid', provider: 'cito', amountPerStudent: 0 },
+  ];
 
-  it('has exactly 20 price records (16 original + 4 new modules)', () => {
-    expect(DEFAULT_PRICES).toHaveLength(20);
+  const allPrices = [...originalPrices, ...newPrices, ...phase27Prices];
+
+  it('has exactly 22 price records (16 original + 4 Plan 02 + 2 Phase 27 R6)', () => {
+    expect(DEFAULT_PRICES).toHaveLength(22);
   });
 
   it('contains all 16 original price records with exact values', () => {

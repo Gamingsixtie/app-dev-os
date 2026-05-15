@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { moduleSelectionSchema, type ModuleSelectionData } from '../schemas/step3-schema.ts';
-import { MODULE_CATALOG, MODULE_CATEGORIES, type ModuleCategory } from '../../../models/modules.ts';
+import { MODULE_CATALOG } from '../../../models/modules.ts';
 import { useSchoolProfileStore } from '../store.ts';
 import StepContainer from '../../../components/wizard/StepContainer.tsx';
 import ModulePriceBadges from '../../../components/wizard/ModulePriceBadges.tsx';
@@ -12,7 +12,25 @@ import type { WizardStepRef } from './WizardStep1.tsx';
 import type { ProviderKey } from '../../../engine/price-comparison.ts';
 import { PROVIDER_LABELS } from '../../../engine/price-comparison.ts';
 
-const CATEGORY_ORDER: ModuleCategory[] = ['leerlingvolgsysteem', 'overige-instrumenten'];
+// Phase 27 R7 — WizardStep3 visual restructure into 2 sections:
+//   1. Basisvaardigheden — kernvakken: Rekenen, Nederlands, Engels, Taalverzorging
+//   2. Extra Modules — al het andere, incl. SLO-verplichte Burgerschap +
+//      Digitale geletterdheid (Plan 27-04) en MVT subgroep (Frans/Duits/Spaans)
+//
+// We groeperen hier op section-niveau (WizardStep3-only concept) en NIET op
+// MODULE_CATEGORIES uit het model. Die data-model categorieën zijn diep
+// verweven met de price-comparison engine + reporting (ComparisonTable
+// gebruikt `'leerlingvolgsysteem'` / `'overige-instrumenten'` als group key);
+// een data-model rename zou 20+ files raken zonder R7-meerwaarde. R7 vraagt
+// een UI-restructure — die landt hier.
+const BASICS_MODULE_IDS: readonly string[] = [
+  'rekenwiskunde',
+  'nederlands',
+  'engels',
+  'taalverzorging',
+];
+
+const MVT_MODULE_IDS: readonly string[] = ['frans', 'duits', 'spaans'];
 
 const PROVIDER_COLORS: Record<ProviderKey, string> = {
   cito: 'bg-[#003082]',    // Cito blauw
@@ -21,11 +39,13 @@ const PROVIDER_COLORS: Record<ProviderKey, string> = {
   saqi: 'bg-purple-500',    // SAQI paars
 };
 
-const MVT_MODULE_IDS = ['frans', 'duits', 'spaans'];
-
 const QUICK_PICKS = [
+  // "LVS Basis" = de drie kern-LVS-vakken (zonder taalverzorging) — label
+  // behouden voor backward-compat (D-16: minimale audit, label-change geen
+  // R7-eis).
   { label: 'LVS Basis', ids: ['rekenwiskunde', 'nederlands', 'engels'] },
-  { label: 'LVS Compleet', ids: MODULE_CATALOG.filter(m => m.category === 'leerlingvolgsysteem').map(m => m.id) },
+  // "LVS Compleet" = drie kernvakken + taalverzorging (de Basisvaardigheden-set).
+  { label: 'LVS Compleet', ids: [...BASICS_MODULE_IDS] },
   { label: 'Alles', ids: MODULE_CATALOG.map(m => m.id) },
 ];
 
@@ -53,6 +73,21 @@ const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) 
   });
 
   const currentModules = watch('selectedModules');
+
+  // Phase 27 R7 section split — preserve MODULE_CATALOG declaration order
+  // (matches existing snapshot/test expectations for module ordering).
+  const basicsModules = MODULE_CATALOG.filter((m) =>
+    BASICS_MODULE_IDS.includes(m.id),
+  );
+  const extraModules = MODULE_CATALOG.filter(
+    (m) => !BASICS_MODULE_IDS.includes(m.id),
+  );
+  const extraRegularModules = extraModules.filter(
+    (m) => !MVT_MODULE_IDS.includes(m.id),
+  );
+  const extraMvtModules = extraModules.filter((m) =>
+    MVT_MODULE_IDS.includes(m.id),
+  );
 
   const toggleModule = (moduleId: string) => {
     const updated = currentModules.includes(moduleId)
@@ -113,72 +148,79 @@ const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) 
         })}
       </div>
 
-      {CATEGORY_ORDER.map((category, catIndex) => {
-        const allModules = MODULE_CATALOG.filter((m) => m.category === category);
+      {/* Basisvaardigheden: kern-vakken die elke VO-school aanbiedt
+          (Rekenen, NL, EN, Taalverzorging) */}
+      <section
+        aria-labelledby="basisvaardigheden-heading"
+        className="mb-6"
+      >
+        <h2
+          id="basisvaardigheden-heading"
+          className="text-[16px] font-semibold text-cito-primary mb-1"
+        >
+          Basisvaardigheden
+        </h2>
+        <p className="text-[13px] text-neutral-500 mb-4">
+          De kern-vakken die elke VO-school aanbiedt.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {basicsModules.map((mod) => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              isSelected={currentModules.includes(mod.id)}
+              onToggle={toggleModule}
+            />
+          ))}
+        </div>
+      </section>
 
-        // For overige-instrumenten: split into regular and MVT modules
-        if (category === 'overige-instrumenten') {
-          const regularModules = allModules.filter(m => !MVT_MODULE_IDS.includes(m.id));
-          const mvtModules = allModules.filter(m => MVT_MODULE_IDS.includes(m.id));
+      {/* Extra Modules: aanvullend aanbod incl. wettelijk verplichte
+          SLO-modules (Burgerschap, Digitale geletterdheid) en MVT-subgroep */}
+      <section
+        aria-labelledby="extra-modules-heading"
+        className="mt-6"
+      >
+        <h2
+          id="extra-modules-heading"
+          className="text-[16px] font-semibold text-cito-primary mb-1"
+        >
+          Extra Modules
+        </h2>
+        <p className="text-[13px] text-neutral-500 mb-4">
+          Aanvullend aanbod voor verdieping en SLO-aansluiting.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {extraRegularModules.map((mod) => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              isSelected={currentModules.includes(mod.id)}
+              onToggle={toggleModule}
+            />
+          ))}
+        </div>
 
-          return (
-            <div key={category} className={catIndex > 0 ? 'mt-6' : ''}>
-              <h3 className="text-[16px] font-semibold text-cito-primary mb-4">
-                {MODULE_CATEGORIES[category]}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {regularModules.map((mod) => (
-                  <ModuleCard
-                    key={mod.id}
-                    mod={mod}
-                    isSelected={currentModules.includes(mod.id)}
-                    onToggle={toggleModule}
-                  />
-                ))}
-              </div>
-
-              {/* MVT subcategory */}
-              {mvtModules.length > 0 && (
-                <div className="mt-5">
-                  <h4 className="text-[14px] font-semibold text-neutral-600 mb-3">
-                    Moderne Vreemde Talen
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {mvtModules.map((mod) => (
-                      <ModuleCard
-                        key={mod.id}
-                        mod={mod}
-                        isSelected={currentModules.includes(mod.id)}
-                        onToggle={toggleModule}
-                        showJijOnlyBadge
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        }
-
-        // Default rendering for other categories
-        return (
-          <div key={category} className={catIndex > 0 ? 'mt-6' : ''}>
-            <h3 className="text-[16px] font-semibold text-cito-primary mb-4">
-              {MODULE_CATEGORIES[category]}
+        {/* MVT subgroep blijft binnen Extra Modules */}
+        {extraMvtModules.length > 0 && (
+          <div className="mt-5">
+            <h3 className="text-[14px] font-semibold text-neutral-600 mb-3">
+              Moderne Vreemde Talen
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {allModules.map((mod) => (
+              {extraMvtModules.map((mod) => (
                 <ModuleCard
                   key={mod.id}
                   mod={mod}
                   isSelected={currentModules.includes(mod.id)}
                   onToggle={toggleModule}
+                  showJijOnlyBadge
                 />
               ))}
             </div>
           </div>
-        );
-      })}
+        )}
+      </section>
 
       {/* Upsell hints for modules not yet selected */}
       {upsellOpportunities.length > 0 && (

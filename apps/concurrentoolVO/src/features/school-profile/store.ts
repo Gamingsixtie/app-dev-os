@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { SchoolLevel, Scenario, ModuleCurrentSetup, PipelineStatus } from '../../models/school';
+import type { SchoolLevel, Scenario, ModuleCurrentSetup, PipelineStatus, CustomerType, SchoolType, GrowthTrajectory, CurrentToolUsage, CurrentToolUsageMap } from '../../models/school';
 import { SCHOOL_SIZE_PRESETS } from '../../data/school-profiles';
 import type { SchoolRecord, Contact, Conversation, ActionItem, SystemEvent, LostDealInfo } from '@/db/types';
 
@@ -13,9 +13,24 @@ interface SchoolProfileState {
   levels: SchoolLevel[];
   setLevels: (levels: SchoolLevel[]) => void;
 
+  // Step 1 — Phase 27 R3 + R4: sales-context fields
+  customerType: CustomerType | null;
+  setCustomerType: (customerType: CustomerType | null) => void;
+  schoolType: SchoolType | null;
+  setSchoolType: (schoolType: SchoolType | null) => void;
+  customSchoolType: string | null;
+  setCustomSchoolType: (customSchoolType: string | null) => void;
+  growthTrajectory: GrowthTrajectory | null;
+  setGrowthTrajectory: (growthTrajectory: GrowthTrajectory | null) => void;
+
   // Step 2
   studentCounts: Partial<Record<SchoolLevel, Record<number, number>>>;
   setStudentCounts: (counts: Partial<Record<SchoolLevel, Record<number, number>>>) => void;
+
+  // Step 2 — Phase 27 R5: per-niveau huidig-gebruik (Cito / DIA / JIJ! / Mix / Geen)
+  currentToolUsage: CurrentToolUsageMap;
+  setCurrentToolUsage: (level: SchoolLevel, value: CurrentToolUsage) => void;
+  setCurrentToolUsageMap: (map: CurrentToolUsageMap) => void;
 
   // Step 3
   selectedModules: string[];
@@ -59,7 +74,14 @@ const initialState = {
   activeSchoolId: null as string | null,
   schoolName: '',
   levels: [] as SchoolLevel[],
+  // Phase 27 R3 + R4 — sales-context fields (null until WizardStep1 submitted)
+  customerType: null as CustomerType | null,
+  schoolType: null as SchoolType | null,
+  customSchoolType: null as string | null,
+  growthTrajectory: null as GrowthTrajectory | null,
   studentCounts: {} as Partial<Record<SchoolLevel, Record<number, number>>>,
+  // Phase 27 R5 — empty map until WizardStep2 captures per-niveau keuzes
+  currentToolUsage: {} as CurrentToolUsageMap,
   selectedModules: [] as string[],
   moduleSetups: [] as ModuleCurrentSetup[],
   scenario: null as Scenario | null,
@@ -83,7 +105,21 @@ export const useSchoolProfileStore = create<SchoolProfileState>()(
 
     setSchoolName: (schoolName) => set({ schoolName }),
     setLevels: (levels) => set({ levels }),
+    // Phase 27 R3 + R4 — sales-context setters (mirror setSchoolName pattern;
+    // WizardShell auto-saves the store state to Dexie + Supabase on Next).
+    setCustomerType: (customerType) => set({ customerType }),
+    setSchoolType: (schoolType) => set({ schoolType }),
+    setCustomSchoolType: (customSchoolType) => set({ customSchoolType }),
+    setGrowthTrajectory: (growthTrajectory) => set({ growthTrajectory }),
     setStudentCounts: (studentCounts) => set({ studentCounts }),
+
+    // Phase 27 R5 — per-niveau huidig-gebruik (WizardStep2). Immer-style
+    // mutate via spread to keep the map shallow-immutable for store subscribers.
+    setCurrentToolUsage: (level, value) =>
+      set((state) => ({
+        currentToolUsage: { ...state.currentToolUsage, [level]: value },
+      })),
+    setCurrentToolUsageMap: (currentToolUsage) => set({ currentToolUsage }),
 
     setSelectedModules: (selectedModules) =>
       set((state) => {
@@ -123,7 +159,14 @@ export const useSchoolProfileStore = create<SchoolProfileState>()(
       activeSchoolId: record.id ?? null,
       schoolName: record.name,
       levels: record.levels,
+      // Phase 27 R3 + R4 — sales-context fields (default to null when missing on legacy rows)
+      customerType: record.customerType ?? null,
+      schoolType: record.schoolType ?? null,
+      customSchoolType: record.customSchoolType ?? null,
+      growthTrajectory: record.growthTrajectory ?? null,
       studentCounts: record.studentCounts,
+      // Phase 27 R5 — currentToolUsage map (default to empty if legacy row)
+      currentToolUsage: record.currentToolUsage ?? {},
       selectedModules: record.selectedModules,
       moduleSetups: record.moduleSetups,
       scenario: record.scenario,

@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase/client';
 
 /** Tables that can be queued for offline mutation sync */
-export type OfflineQueueTable = 'schools' | 'contacts' | 'conversations' | 'actions' | 'school_prices' | 'system_events' | 'schoolplan_analyses' | 'planned_touchpoints';
+export type OfflineQueueTable = 'schools' | 'contacts' | 'conversations' | 'actions' | 'school_prices' | 'system_events' | 'schoolplan_analyses' | 'planned_touchpoints' | 'stichtingen';
 
 export interface PendingMutation {
   id: string;

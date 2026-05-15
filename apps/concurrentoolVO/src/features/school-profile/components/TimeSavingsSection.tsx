@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import type { TimeSavingResult } from '@/engine/migration';
-import type { TimeSavingTask } from '@/models/migration';
-import { TIME_SAVING_TASKS } from '@/models/migration';
+import type { TimeSavingResult, TimeSavingTask } from '@/models/time-savings';
+import { TIME_SAVING_TASKS } from '@/models/time-savings';
 import { EditableField } from './EditableField';
 import { formatCurrency } from '@/lib/format';
 

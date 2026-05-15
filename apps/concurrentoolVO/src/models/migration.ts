@@ -1,66 +1,13 @@
 /**
- * Tijdswinst-taken voor de migratie van huidig naar nieuw Cito-platform.
- * defaultHoursPerYear is een startwaarde — de consultant past dit aan per schoolgesprek.
- * Uren kunnen null zijn als de consultant de tijdwinst niet kent of wil overslaan.
+ * Backward-compat re-export shim (Phase 27 Wave 0).
+ *
+ * `TimeSavingTask` + `TIME_SAVING_TASKS` were relocated to
+ * `@/models/time-savings`. This re-export keeps the old import path
+ * working for now. Plan 27-10 removes this shim entirely — at that point
+ * all consumers must import from `@/models/time-savings`.
  */
-
-export interface TimeSavingTask {
-  id: string;
-  label: string;
-  oldMethodLabel: string;
-  newMethodLabel: string;
-  defaultHoursPerYear: number;
-  description: string;
-  benefit: string;
-}
-
-export const TIME_SAVING_TASKS: TimeSavingTask[] = [
-  {
-    id: 'rechten',
-    label: 'Rechten docenten',
-    oldMethodLabel: 'Handmatig',
-    newMethodLabel: 'Automatisch',
-    defaultHoursPerYear: 10,
-    description: 'Docenten krijgen automatisch de juiste rechten via koppeling met Entree-federatie.',
-    benefit: 'Geen handmatig beheer meer, minder fouten bij start schooljaar.',
-  },
-  {
-    id: 'resetten',
-    label: 'Toetsen resetten',
-    oldMethodLabel: 'Klantenservice bellen',
-    newMethodLabel: 'Zelf doen',
-    defaultHoursPerYear: 12,
-    description: 'Toetsen direct resetten vanuit het dashboard, zonder te wachten op klantenservice.',
-    benefit: 'Directe actie mogelijk, geen wachttijd bij urgente situaties.',
-  },
-  {
-    id: 'inloggen',
-    label: 'Inlogmethode',
-    oldMethodLabel: 'Startcodes',
-    newMethodLabel: 'Entree-federatie',
-    defaultHoursPerYear: 8,
-    description: 'Leerlingen loggen in via Entree-federatie i.p.v. losse startcodes per toets.',
-    benefit: 'Geen startcodes meer printen en uitdelen, minder uitval door inlogproblemen.',
-  },
-  {
-    id: 'planning',
-    label: 'Planning',
-    oldMethodLabel: 'Handmatig',
-    newMethodLabel: 'Automatisch voorstel',
-    defaultHoursPerYear: 10,
-    description: 'Het platform stelt automatisch een toetsplanning voor op basis van het jaarrooster.',
-    benefit: 'Snellere planning, minder kans op roosterconflicten.',
-  },
-  {
-    id: 'koppeling',
-    label: 'Leerling-/docentkoppeling',
-    oldMethodLabel: 'Handmatig EDEXML',
-    newMethodLabel: 'Somtoday/Magister sync',
-    defaultHoursPerYear: 8,
-    description: 'Leerling- en docentgegevens worden automatisch gesynchroniseerd vanuit het LAS.',
-    benefit: 'Altijd actuele gegevens, geen handmatige EDEXML-uploads meer.',
-  },
-];
+export { TIME_SAVING_TASKS } from '@/models/time-savings';
+export type { TimeSavingTask } from '@/models/time-savings';
 
 // ─── Migratie module voordelen ──────────────────────────────────────────────
 

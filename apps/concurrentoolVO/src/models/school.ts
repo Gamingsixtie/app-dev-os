@@ -9,6 +9,69 @@ export const SCHOOL_LEVEL_LABELS: Record<SchoolLevel, string> = {
   'vwo': 'VWO',
 };
 
+// --- Phase 27 R3: Customer type (Cito-klant onderscheid in WizardStep1) ---
+
+export const CUSTOMER_TYPES = ['huidige-cito', 'nieuwe-prospect', 'gedeeltelijk'] as const;
+export type CustomerType = typeof CUSTOMER_TYPES[number];
+
+export const CUSTOMER_TYPE_LABELS: Record<CustomerType, string> = {
+  'huidige-cito': 'Huidige Cito-klant',
+  'nieuwe-prospect': 'Nieuwe prospect',
+  'gedeeltelijk': 'Gedeeltelijk',
+};
+
+// --- Phase 27 R4: Schoolsoort-varianten + groei-trajectorie ---
+
+export const SCHOOL_TYPES = ['regulier', 'dakpanklas', 'dalton', 'montessori', 'vrije-school', 'overig'] as const;
+export type SchoolType = typeof SCHOOL_TYPES[number];
+
+export const SCHOOL_TYPE_LABELS: Record<SchoolType, string> = {
+  regulier: 'Regulier',
+  dakpanklas: 'Dakpanklas',
+  dalton: 'Daltonschool',
+  montessori: 'Montessorischool',
+  'vrije-school': 'Vrije school',
+  overig: 'Anders, namelijk:',
+};
+
+export const GROWTH_TRAJECTORIES = ['groei', 'krimp', 'stabiel', 'loting'] as const;
+export type GrowthTrajectory = typeof GROWTH_TRAJECTORIES[number];
+
+export const GROWTH_TRAJECTORY_LABELS: Record<GrowthTrajectory, string> = {
+  groei: 'Groeit',
+  krimp: 'Krimpt',
+  stabiel: 'Stabiel',
+  loting: 'Loting (mogelijke daling)',
+};
+
+// --- Phase 27 R5: Current tool usage per niveau (WizardStep2) ---
+
+/**
+ * Welk toets-pakket gebruikt een school op dit moment op één specifiek
+ * onderwijsniveau. Wordt per niveau gevraagd in WizardStep2 en aggregeert
+ * op stichtings-niveau naar `UsageMix` (zie `src/models/stichting.ts`).
+ *
+ * - `cito` — al volledig op Cito (huidige klant).
+ * - `dia`  — DIA-gebruiker (concurrent).
+ * - `jij`  — JIJ! / IEP-gebruiker (concurrent).
+ * - `mix`  — gebruikt meerdere aanbieders binnen dit niveau.
+ * - `geen` — gebruikt nu nog niets (nieuwe markt).
+ */
+export const CURRENT_TOOL_USAGE_VALUES = ['cito', 'dia', 'jij', 'mix', 'geen'] as const;
+export type CurrentToolUsage = typeof CURRENT_TOOL_USAGE_VALUES[number];
+
+/** Per-niveau mapping; missing keys = "nog geen keuze". Optioneel veld. */
+export type CurrentToolUsageMap = Partial<Record<SchoolLevel, CurrentToolUsage>>;
+
+/** Dutch UI labels — locked per Plan 27-05 interfaces-block. */
+export const CURRENT_TOOL_USAGE_LABELS: Record<CurrentToolUsage, string> = {
+  cito: 'Cito',
+  dia: 'DIA',
+  jij: 'JIJ!',
+  mix: 'Mix (meerdere aanbieders)',
+  geen: 'Geen (nieuwe markt)',
+};
+
 /** Leerjaren per niveau */
 export const YEARS_PER_LEVEL: Record<SchoolLevel, number[]> = {
   'vmbo-b': [1, 2, 3, 4],

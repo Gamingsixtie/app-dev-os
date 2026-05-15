@@ -82,7 +82,8 @@ Plans:
  (completed 2026-03-28)
  (completed 2026-03-25)
 - [x] **Phase 24: UX-audit Vergelijkingsoverzicht** - Vergelijkingsoverzicht UX-technisch doorgelicht en geoptimaliseerd: doublures geëlimineerd, progressive disclosure, stakeholder-ready (completed 2026-03-28)
-- [ ] **Phase 25: Prijsintelligentie & Stakeholder Feedback Loop** - Database-driven prijsdata met stakeholder-feedbackworkflow: flaggen, corrigeren, valideren, audittrail, automatische herberekening en ops-competitor-intel skill
+- [~] **Phase 25: Prijsintelligentie & Stakeholder Feedback Loop** - Database-driven prijsdata met stakeholder-feedbackworkflow: flaggen, corrigeren, valideren, audittrail, automatische herberekening en ops-competitor-intel skill _(CLOSED – INCOMPLETE 2026-05-14: 11/12 plans gedaan, 25-07 UI-integration deferred — verder niet afgemaakt, zie Phase 25 details)_
+- [ ] **Phase 26: Cito Prijzen + Concurrentie Editor** - Startscherm-entry naast Schooloverzicht met dedicated prijs-editor (tabs Basisvaardigheden/Modules/Concurrentie), multi-format export (PDF/HTML/Word/TXT) en optionele AI-Excel-import met diff-preview
 
 ## Phase Details
 
@@ -350,7 +351,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
 | 22. Architectuur, Testen & Productie-readiness | v2.0 | 6/6 | Complete    | 2026-03-28 |
 | 24. UX-audit Vergelijkingsoverzicht | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 25. Prijsintelligentie & Stakeholder Feedback Loop | v2.0 | 11/12 | In Progress|  |
+| 25. Prijsintelligentie & Stakeholder Feedback Loop | v2.0 | 11/12 | Closed (Incomplete) | 2026-05-14 |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -513,7 +514,10 @@ Plans:
 - [x] 24-01-PLAN.md — SectionBand + ProviderToolbar extractie, ComparisonSummary/MeerwaardePanel cleanup, pagina-herstructurering met kleurzones
 - [x] 24-02-PLAN.md — AI hero collapse/expand met SchoolplanBanner integratie, visuele checkpoint
 
-### Phase 25: Prijsintelligentie & Stakeholder Feedback Loop
+### Phase 25: Prijsintelligentie & Stakeholder Feedback Loop _(CLOSED – INCOMPLETE 2026-05-14)_
+
+**Closure note (2026-05-14):** Phase wordt niet meer afgemaakt. 11/12 plans uitgevoerd; 25-07 (UI-integration: "Klopt niet" triggers, staleness indicators, AI normalization endpoint) blijft deferred. De DB-driven prijsdata, review-queue, discount-engine, admin-editor en ops-competitor-intel skill staan in productie en werken zelfstandig — de "Klopt niet"-feedback-loop UI ontbreekt nog. Reden voor sluiting: focus verschuift naar Phase 26 (Cito Prijzen + Concurrentie Editor) en Phase 27 (Wizard-optimalisatie). Restscope kan later opnieuw worden ingepland als losse phase als de feedback-loop alsnog nodig blijkt.
+
 **Goal**: Concurrentie-informatie (prijzen, bundelstructuren, features) verplaatsen van hardcoded TypeScript-bestanden naar een database-driven systeem met stakeholder-feedbackworkflow — zodat accountmanagers en productspecialisten prijzen kunnen flaggen, corrigeren en valideren, en elke wijziging automatisch doorcijfert naar alle vergelijkingen en analyses.
 **Depends on**: Phase 22 (productie-readiness), Phase 10.1 (provider configs), Phase 9 (prijsbeheer infra)
 **Requirements**: PI-01, PI-02, PI-03, PI-04, PI-05, PI-06, PI-07, PI-08, PI-09, PI-10
@@ -528,21 +532,21 @@ Plans:
   8. Staleness-detectie: systeem signaleert proactief wanneer prijzen van een provider langer dan 6 maanden niet geverifieerd zijn, per provider en per module
   9. `ops-competitor-intel` skill is gebouwd als single entry point voor alle concurrentie-informatie (handmatig, document-upload, AI-intake, periodieke check) en schrijft naar de review-queue
   10. Offline modus blijft werken: app valt terug op laatst gesyncte prijsdata uit localStorage/IndexedDB wanneer Supabase niet bereikbaar is
-**Plans:** 11/12 plans executed
+**Plans:** 11/12 plans executed (1 deferred — phase closed)
 
 Plans:
 - [x] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
 - [x] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
-- [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
-- [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
+- [x] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
+- [x] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
 - [x] 25-05-PLAN.md — Discount pattern detection engine + market pricing toggle + alerts
 - [x] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
-- [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
+- [~] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint _(DEFERRED — phase closed 2026-05-14)_
 - [x] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
 - [x] 25-09-PLAN.md — [GAP] Wire loadFromSupabase at app startup (RootLayout useEffect)
 - [x] 25-10-PLAN.md — [GAP] Wire AdminConfigEditor handleSave to Supabase persistence
 - [x] 25-11-PLAN.md — [GAP] Wire orphaned discount pattern UI into PriceComparisonPage
-- [ ] 25-12-PLAN.md — [GAP] Fill todo-only test stubs for offline pricing and price provider
+- [x] 25-12-PLAN.md — [GAP] Fill todo-only test stubs for offline pricing and price provider
 
 ## Backlog
 
@@ -557,3 +561,57 @@ Plans:
 
 Plans:
 - [x] 999.1-01-PLAN.md — SchoolNameDialog, SchoolCard wizard-routing, DashboardTab CTA banner, WizardPage context-header
+
+### Phase 26: Cito Prijzen + Concurrentie Editor — startscherm-entry naast Schooloverzicht met dedicated prijs-editor (tabs Basisvaardigheden/Modules/Concurrentie), multi-format export (PDF/HTML/Word/TXT) van de prijslijst, en AI-Excel-import voor batch prijs-updates met diff-preview voor goedkeuring
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 25
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 26 to break down)
+
+### Phase 27: Wizard-optimalisatie bestaande klant vs nieuwe klant + Stichting-laag
+
+**Goal:** Sales-accountmanagers onderscheiden bestaande Cito-klanten van nieuwe prospects, groeperen scholen onder een Stichting (bestuur), zetten concurrent-pijnpunten om naar Cito-voordelen via AI+rule-based matching, en vergelijken Cito Basis vs Cito Plus — met cito-oud volledig uit het systeem.
+**Requirements**: R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11
+**Depends on:** Phase 26
+**Plans:** 16 plans (revised 2026-05-14 after gsd-plan-checker BLOCKER #1 + WARNINGS #2/3/5/6)
+
+Plans:
+- [x] 27-01-PLAN.md — Wave 0: type-relocatie TimeSavingTask naar src/models/time-savings.ts + 11 test-scaffolds (R1, R2, R6, R9, R10, R11)
+- [x] 27-02-PLAN.md — Wave 1: Stichting entity + CRUD + Dexie/Supabase + /stichtingen routes (R1)
+- [x] 27-03-PLAN.md — Wave 2: WizardStep1 klant-type + schoolsoort + groei-trajectorie velden (R3, R4)
+- [x] 27-04-PLAN.md — Wave 1: Burgerschap + Digitale geletterdheid in module-catalogus (R6) [revised: checkpoint dropped per SPEC R6 lock]
+- [x] 27-05-PLAN.md — Wave 3: WizardStep2 huidig-gebruik per niveau + stichting mix-aggregatie (R5)
+- [x] 27-06-PLAN.md — Wave 2: WizardStep3 herstructureren naar Basisvaardigheden + Extra Modules (R7)
+- [x] 27-07-PLAN.md — Wave 2: Stichting bulk-link met smart-suggestion + inline Levenshtein (R11)
+- [ ] 27-08-PLAN.md — Wave 4: WizardStep4 summary-blok + opmerkingen + TimeInputSection dual-mode (R8)
+- [ ] 27-09-PLAN.md — Wave 5: R9 data-laag (pain_point_match_feedback + team_settings migrations) + rule-based fallback (R9) [revised: split with 27-16]
+- [ ] 27-10-PLAN.md — Wave 6: cito-oud cleanup-fase 1: scope-verify (Assumption A1) + LOCKED file delete + big-bang deletes (R10) [autonomous: false — LOCKED file delete, revised: split into 27-10/13/14/15]
+- [ ] 27-11-PLAN.md — Wave 7: Stichting bulk-export CSV + DMU-PDF-aggregatie (R2)
+- [ ] 27-12-PLAN.md — Wave 8: E2E tests + grep-gates + UAT-walkthrough (alle R1-R11) [autonomous: false — UAT gate]
+- [ ] 27-13-PLAN.md — Wave 6: cito-oud cleanup-fase 2: enum-strip uit CurrentProvider + Zod schemas + WizardStep4 dropdown (R10) [NEW — depends_on 27-10]
+- [ ] 27-14-PLAN.md — Wave 6: cito-oud cleanup-fase 3: Scenario type rename + routes cleanup + scenario-detection rewrites (R10) [NEW — depends_on 27-13]
+- [ ] 27-15-PLAN.md — Wave 6: cito-oud cleanup-fase 4: calculateBasisPlusUpsell + WizardStep5 Basis/Plus/Upsell + final engine cleanup + Supabase migration 020 (R10) [NEW — depends_on 27-14]
+- [ ] 27-16-PLAN.md — Wave 5: R9 AI-laag: Vercel function + PainPointPanel UI + PromptOverrideSettings (R9) [NEW — depends_on 27-09, parallel to 27-09 in same wave]
+
+### Phase 28: Win/loss-tracking & Marktpositie — Aparte 'Uitkomst/Deal'-tab per school waar accountmanager elke prijsvergelijking-uitkomst registreert (gewonnen/verloren/in onderhandeling, prijsverschil, reden, contactpersoon), cross-school marktpositie-dashboard met telstanden (win-rate, gemiddelde marge t.o.v. concurrent, top verlies-redenen), en korting-verrijking in vergelijking-tab zodat actuele kortingen meegenomen worden in de uiteindelijke prijs
+
+**Goal:** Accountmanagers registreren per school de uitkomst van elke prijsvergelijking in een Uitkomst/Deal-tab (gewonnen/verloren/in onderhandeling) met prijs-snapshot, reden, contactpersoon en per-deal kortingen; een cross-school marktdashboard aggregeert dit tot win-rate + marge + trend; en een cohort-AI voorspelt win-kans op basis van (onderwijsvisie, schoolniveau).
+**Requirements**: R1, R2, R3, R4, R5
+**Depends on:** Phase 27
+**Plans:** 4/10 plans executed
+
+Plans:
+- [x] 28-01-PLAN.md — Wave 1: types + Zod schemas + Dutch labels + 14 test scaffolds (R1, R2, R3, R4, R5)
+- [x] 28-02-PLAN.md — Wave 2: migrations 017 (schools.onderwijsvisie) + 018 (deal_outcomes/discounts/audit-log + RLS) + Supabase types + row-shape mappers (R1, R2, R3) — actual file numbers bumped from PLAN.md's 016+017 because 016 was taken by Phase 27-05
+- [x] 28-03-PLAN.md — Wave 3: migration 019 (deal_cohort_stats matview + SECURITY DEFINER refresh trigger + pg_cron nightly fallback + RPC) + Supabase Views type + mapCohortStatsRow + CohortStats harmonization (R5) — migration renumbered 018 → 019 per executor critical-deviation note
+- [x] 28-04-PLAN.md — Wave 2: engine extension price-comparison.ts dealDiscounts overlay (R3) [parallel to 28-02; iter 2: rewritten against real engine API]
+- [ ] 28-05-PLAN.md — Wave 3: Uitkomst-tab + DealAfsluitenDialog + WinDealDialog + LostDealForm + CRUD operations + snapshot helper + Heropen-deal button (R1, R2) [iter 2: B5 + F9 fixes]
+- [ ] 28-05b-PLAN.md — Wave 5: DealDetailsForm inline edit + StickyDirtyBar (R1) [NEW iter 2 — F11 fix; depends on 05+06, serializes DealOutcomesTab.tsx write after 06]
+- [ ] 28-06-PLAN.md — Wave 4: DiscountEditor + DiscountRow + AuditLogAccordion + comparison-tab recalc integration (R3) [iter 2: F6 fix]
+- [ ] 28-07-PLAN.md — Wave 4: migration 020 get_deal_stats RPC + /dashboard route + KPI cards + TrendChart + CompetitorBreakdownCard + filters (R4) [iter 2: B3 demoted from Wave 3, B6 RPC, F2 grouping toggle, F8 global-N=0] — migration number bumped from 019 (28-03 now owns 019)
+- [ ] 28-08-PLAN.md — Wave 6: CohortPredictionCard + useCohortPrediction + onderwijsvisie field on school (R5) [iter 2: B4 demoted to serialize DealOutcomesTab writes after 06+05b]
+- [ ] 28-09-PLAN.md — Wave 7: LostDealDialog cleanup (incl. PipelineKanbanView) + pipeline-dropdown tooltip + redirect-to-Uitkomst from kanban + Playwright e2e + UAT gate (R1, R2, R3, R4, R5) [autonomous: false — UAT gate; iter 2: B2 fix]

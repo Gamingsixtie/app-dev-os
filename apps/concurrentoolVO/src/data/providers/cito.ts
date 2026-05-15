@@ -238,6 +238,30 @@ const CITO_DEFAULT_PRICES: PriceRecord[] = [
     isPublicationPrice: true,
     note: 'SEF en LWH worden samen aangeboden voor €6/leerjaar (€18 totaal over 3 jr = €6/lln/jr).',
   },
+  // Phase 27 R6 — Extra modules (Burgerschap + Digitale geletterdheid).
+  // Placeholder tarieven: €0,00. Data-correctheid is owner-verantwoordelijkheid
+  // (SPEC R6 out-of-scope). Geforceerde €0,00 dwingt handmatige invoer af voor
+  // publicatie.
+  {
+    moduleId: 'burgerschap',
+    provider: 'cito',
+    amountPerStudent: 0,
+    source: 'manual',
+    sourceLabel: 'Placeholder — Cito tarief Burgerschap nog niet gepubliceerd',
+    verifiedAt: new Date('2026-05-15'),
+    isPublicationPrice: false,
+    note: 'Placeholder €0,00. Owner moet werkelijk tarief invullen via prijs-editor voor klantgesprekken.',
+  },
+  {
+    moduleId: 'digitale-geletterdheid',
+    provider: 'cito',
+    amountPerStudent: 0,
+    source: 'manual',
+    sourceLabel: 'Placeholder — Cito tarief Digitale geletterdheid nog niet gepubliceerd',
+    verifiedAt: new Date('2026-05-15'),
+    isPublicationPrice: false,
+    note: 'Placeholder €0,00. Owner moet werkelijk tarief invullen via prijs-editor voor klantgesprekken.',
+  },
 ];
 
 // ─── Provider Config ────────────────────────────────────────────────────────────
@@ -264,6 +288,9 @@ export const CITO_CONFIG: CitoProviderConfig = {
       'sociaal-emotioneel': 3.00,
       'leer-werkhouding': 3.00,
       'cognitieve-capaciteiten': 19.90,
+      // Phase 27 R6 — placeholder tarieven, owner-verantwoordelijkheid.
+      'burgerschap': 0,
+      'digitale-geletterdheid': 0,
     },
   },
   defaultPrices: CITO_DEFAULT_PRICES,

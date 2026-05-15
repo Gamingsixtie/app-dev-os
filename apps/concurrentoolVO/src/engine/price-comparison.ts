@@ -62,6 +62,66 @@ export interface ComparisonOptions {
   forceDiaPackageId?: string | null;
   /** Injected provider configs from pricing data store (D-03). Falls back to static PROVIDER_CONFIGS when omitted. */
   providerConfigs?: Record<string, ProviderConfig>;
+  /** Phase 28 R3: per-deal kortingen overlay. Applied as post-calculator step
+   * before final totals + differences. Empty/undefined = no overlay (backward compat). */
+  dealDiscounts?: readonly EngineDealDiscount[];
+}
+
+/** Phase 28 R3: per-deal discount input for engine recalc.
+ * Mutually exclusive: exactly one of discountPercentage or discountAmount is set.
+ * Validated by Zod (Plan 01) + DB CHECK (Plan 02). Defensive nul-checks here too. */
+export interface EngineDealDiscount {
+  moduleId: string;
+  provider: ProviderKey;
+  /** 0-100 (range enforced by Zod + DB CHECK); XOR with discountAmount. */
+  discountPercentage?: number;
+  /** EUR per student, >= 0 (enforced by Zod + DB CHECK); XOR with discountPercentage. */
+  discountAmount?: number;
+}
+
+/** Phase 28: apply a single per-deal discount to a ProviderCost.
+ * Pure operation — returns a NEW ProviderCost (input is not mutated).
+ * XOR resolution: percentage takes precedence if (defensively) both are set.
+ * Negative results clamped to 0 (defense-in-depth; Zod + DB CHECK enforce upstream). */
+function applyDealDiscountToProviderCost(
+  cost: ProviderCost,
+  discount: EngineDealDiscount,
+): ProviderCost {
+  const basePerStudent = cost.pricePerStudent;
+  let adjustedPerStudent: number;
+  let discountLabel: string;
+
+  if (discount.discountPercentage !== undefined && discount.discountPercentage !== null) {
+    const pct = discount.discountPercentage;
+    adjustedPerStudent = Math.max(0, basePerStudent * (1 - pct / 100));
+    discountLabel = `Deal-korting (-${pct}%)`;
+  } else if (discount.discountAmount !== undefined && discount.discountAmount !== null) {
+    adjustedPerStudent = Math.max(0, basePerStudent - discount.discountAmount);
+    discountLabel = `Deal-korting (-€${discount.discountAmount.toFixed(2)}/lln)`;
+  } else {
+    // Neither field set — defensive skip (Zod + DB CHECK should already prevent this).
+    return cost;
+  }
+
+  const delta = adjustedPerStudent - basePerStudent; // negative (or 0 if base was 0)
+  const newBreakdown: PriceBreakdownStep[] = [
+    ...cost.breakdown,
+    { label: discountLabel, amount: delta },
+  ];
+
+  return {
+    ...cost,
+    pricePerStudent: adjustedPerStudent,
+    totalCost: adjustedPerStudent * cost.studentCount,
+    breakdown: newBreakdown,
+    priceRecord: {
+      ...cost.priceRecord,
+      amountPerStudent: adjustedPerStudent,
+      source: 'manual' as const,
+      sourceLabel: 'Deal-korting',
+      isPublicationPrice: false,
+    },
+  };
 }
 
 /**
@@ -213,6 +273,21 @@ export function calculateComparison(
 
     return { moduleId, moduleName, moduleCategory, providers };
   });
+
+  // === Phase 28 R3: dealDiscounts overlay ===
+  // Applied AFTER modules construction but BEFORE totals + differences (D-01 constraint).
+  // Empty/undefined dealDiscounts → no-op (backward compat).
+  // Unknown moduleId or null ProviderCost → silently skipped (defensive).
+  if (options.dealDiscounts && options.dealDiscounts.length > 0) {
+    for (const discount of options.dealDiscounts) {
+      const mod = modules.find((m) => m.moduleId === discount.moduleId);
+      if (!mod) continue; // defensive: unknown module → silent skip
+      const cost = mod.providers[discount.provider];
+      if (!cost) continue; // defensive: provider has no price for this module → silent skip
+      mod.providers[discount.provider] = applyDealDiscountToProviderCost(cost, discount);
+    }
+  }
+  // === end Phase 28 overlay ===
 
   // Compute totals per provider
   const totals: Record<ProviderKey, number> = { cito: 0, dia: 0, jij: 0, saqi: 0 };

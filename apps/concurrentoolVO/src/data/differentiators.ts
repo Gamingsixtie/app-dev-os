@@ -109,4 +109,26 @@ export const MODULE_DIFFERENTIATORS: ModuleDifferentiators[] = [
     ],
     saqi: [],
   },
+  // Phase 27 R6 — Extra modules, Cito-onderscheidende voordelen (concurrenten
+  // bieden deze modules niet aan, dus dia/jij/saqi=[]).
+  {
+    moduleId: 'burgerschap',
+    cito: [
+      'Aansluitend op SLO kerndoelen 2025-2026 (wettelijk verplicht 1-8-2027)',
+      'Geïntegreerde rapportage in LVS — geen apart systeem nodig',
+    ],
+    dia: [],
+    jij: [],
+    saqi: [],
+  },
+  {
+    moduleId: 'digitale-geletterdheid',
+    cito: [
+      'Inclusief AI-geletterdheid (nieuw SLO-domein 2025-2026)',
+      'Adaptief leerpad: 3 domeinen (digitale geletterdheid, mediawijsheid, computational thinking)',
+    ],
+    dia: [],
+    jij: [],
+    saqi: [],
+  },
 ];

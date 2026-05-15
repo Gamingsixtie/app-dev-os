@@ -1,6 +1,6 @@
 import type { CitoMigrationPriceRecord } from '../data/cito-migration-prices';
-import type { TimeSavingTask } from '../models/migration';
-import { TIME_SAVING_TASKS } from '../models/migration';
+import type { TimeSavingResult, TimeSavingTask } from '../models/time-savings';
+import { TIME_SAVING_TASKS } from '../models/time-savings';
 import { MODULE_CATALOG } from '../models/modules';
 import { getTotalStudents } from './price-comparison';
 
@@ -15,15 +15,15 @@ export interface MigrationModuleResult {
   annualDifference: number;
 }
 
-export interface TimeSavingResult {
-  taskId: TimeSavingTask['id'];
-  taskLabel: string;
-  oldMethodLabel: string;
-  newMethodLabel: string;
-  /** null = unknown/skipped by consultant */
-  hoursPerYear: number | null;
-  valuePerYear: number; // hoursPerYear × hourlyRate (0 when hours is null)
-}
+/**
+ * Backward-compat re-export shim (Phase 27 Wave 0).
+ *
+ * `TimeSavingResult` was relocated to `@/models/time-savings`. This
+ * re-export keeps the old import path working for callers that import
+ * `TimeSavingResult` from `@/engine/migration`. Plan 27-10 removes the
+ * shim and forces callers to use `@/models/time-savings` directly.
+ */
+export type { TimeSavingResult } from '../models/time-savings';
 
 export interface MultiYearProjectionEntry {
   year: 1 | 3;
